@@ -98,18 +98,3 @@ This will start both the frontend (port 3000) and backend (port 5000) servers co
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
-
-## Team
-
-- [Your Name] - Project Lead
-- [Team Member 1] - Frontend Developer
-- [Team Member 2] - Backend Developer
-- [Team Member 3] - IoT Specialist
-
-## Acknowledgments
-
-- [Any third-party libraries or resources you want to acknowledge]
-- [Any inspiration or reference projects]
