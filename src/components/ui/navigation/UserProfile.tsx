@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/Button"
 import { cx, focusRing } from "@/lib/utils"
+import { useUser } from "@clerk/nextjs"
 import { RiMore2Fill } from "@remixicon/react"
-import { useUser, SignOutButton } from "@clerk/nextjs"
 import { DropdownUserProfile } from "./DropdownUserProfile"
 
 export const UserProfileDesktop = () => {

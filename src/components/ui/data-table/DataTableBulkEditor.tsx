@@ -54,7 +54,7 @@ function DataTableBulkEditor<TData>({
     setIsLoading(true)
     try {
       const pigId = selectedPig.owner.replace('PIG-', '')
-      await axios.put(`https://iot-pig-monitoring-backend.onrender.com//api/pigs/${pigId}`, formData)
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/pigs/${pigId}`, formData)
       window.location.reload() // Refresh to show updated data
     } catch (error) {
       console.error('Error updating pig:', error)
@@ -71,7 +71,7 @@ function DataTableBulkEditor<TData>({
       const selectedPigs = table.getSelectedRowModel().rows.map(row => 
         (row.original as any).owner.replace('PIG-', '')
       )
-      await axios.delete('https://iot-pig-monitoring-backend.onrender.com/api/pigs', {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/pigs`, {
         data: { pigIds: selectedPigs }
       })
       window.location.reload() // Refresh to show updated data

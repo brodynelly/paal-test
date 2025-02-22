@@ -1,5 +1,4 @@
 "use client"
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { RiArrowLeftSLine, RiArrowRightSLine } from "@remixicon/react"
 import React from "react"

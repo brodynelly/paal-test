@@ -12,7 +12,20 @@ import { useEffect, useState } from "react"
 
 export default function Support() {
   const [devices, setDevices] = useState([])
-  const [deviceMetrics, setDeviceMetrics] = useState({
+  interface DeviceMetrics {
+    totalDevices: number;
+    deviceStatus: { status: string; percentage: number; count: number }[];
+    performance: {
+      runtimeExpected: number;
+      criticalCondition: number;
+    };
+    volumeTrends: {
+      today: number;
+      yesterday: number;
+    };
+  }
+  
+  const [deviceMetrics, setDeviceMetrics] = useState<DeviceMetrics>({
     totalDevices: 0,
     deviceStatus: [],
     performance: {
@@ -31,7 +44,7 @@ export default function Support() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const response = await fetch('https://iot-pig-monitoring-backend.onrender.com/api/devices')
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/devices`)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
@@ -117,7 +130,7 @@ export default function Support() {
           <CategoryBar
             values={deviceMetrics.deviceStatus.map(s => s.percentage)}
             className="mt-6"
-            colors={["blue", "lightGray", "red"]}
+            colors={["blue", "gray", "pink"]}
             showLabels={false}
           />
           <ul
@@ -213,18 +226,18 @@ export default function Support() {
               </div>
             </dd>
             <LineChartSupport
-              className="h-28"
-              data={volume}
-              index="time"
-              categories={["Today", "Yesterday"]}
-              colors={["blue", "lightGray"]}
-              showTooltip={false}
-              valueFormatter={(number: number) =>
-                Intl.NumberFormat("us").format(number).toString()
-              }
-              startEndOnly={true}
-              showYAxis={false}
-              showLegend={false}
+                className="h-28"
+                data={volume}
+                index="time"
+                categories={["Today", "Yesterday"]}
+                colors={["blue", "gray"]}
+                showTooltip={false}
+                valueFormatter={(number: number) =>
+                  Intl.NumberFormat("us").format(number).toString()
+                }
+                startEndOnly={true}
+                showYAxis={false}
+                showLegend={false}
             />
           </div>
         </Card>

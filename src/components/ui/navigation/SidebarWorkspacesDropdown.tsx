@@ -27,20 +27,20 @@ const workspaces = [
 
 export const WorkspacesDropdownDesktop = () => {
   const [dropdownOpen, setDropdownOpen] = React.useState(false)
-  const [hasOpenDialog, setHasOpenDialog] = React.useState(false)
-  const dropdownTriggerRef = React.useRef<null | HTMLButtonElement>(null)
+  // const [hasOpenDialog, setHasOpenDialog] = React.useState(false)
+  // const dropdownTriggerRef = React.useRef<null | HTMLButtonElement>(null)
   const focusRef = React.useRef<null | HTMLButtonElement>(null)
 
-  const handleDialogItemSelect = () => {
-    focusRef.current = dropdownTriggerRef.current
-  }
+  // const handleDialogItemSelect = () => {
+  //   focusRef.current = dropdownTriggerRef.current
+  // }
 
-  const handleDialogItemOpenChange = (open: boolean) => {
-    setHasOpenDialog(open)
-    if (open === false) {
-      setDropdownOpen(false)
-    }
-  }
+  // const handleDialogItemOpenChange = (open: boolean) => {
+  //   setHasOpenDialog(open)
+  //   if (open === false) {
+  //     setDropdownOpen(false)
+  //   }
+  // }
   return (
     <>
       {/* sidebar (lg+) */}
@@ -79,7 +79,7 @@ export const WorkspacesDropdownDesktop = () => {
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          hidden={hasOpenDialog}
+          // hidden={hasOpenDialog}
           onCloseAutoFocus={(event) => {
             if (focusRef.current) {
               focusRef.current.focus()

@@ -14,7 +14,7 @@ export default function Example() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const response = await fetch('https://iot-pig-monitoring-backend.onrender.com/api/pigs')
+        const response = await fetch(`${process.env.REACT_APP_API_URL}`)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
-    const response = await fetch('https://iot-pig-monitoring-backend.onrender.com/api/stats')
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/stats`)
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {

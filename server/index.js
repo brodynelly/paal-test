@@ -9,7 +9,7 @@ const app = express()
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: process.env.REACT_APP_API_URL,
     methods: ["GET", "POST"]
   }
 })

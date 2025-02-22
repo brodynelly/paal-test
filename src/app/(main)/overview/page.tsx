@@ -11,7 +11,7 @@ import { DateRange } from "react-day-picker"
 
 export type PeriodValue = "previous-period" | "last-year" | "no-comparison"
 
-const categories = [
+const categories: { title: "Temperature" | "BCS Score" | "Posture"; type: "unit" | "currency"; }[] = [
   {
     title: "Temperature",
     type: "unit",

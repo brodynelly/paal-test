@@ -58,7 +58,7 @@ export function DataTable<TData>({ columns, data }: DataTableProps<TData>) {
     e.preventDefault()
     setIsLoading(true)
     try {
-      await axios.post('https://iot-pig-monitoring-backend.onrender.com/api/devices', formData)
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/devices`, formData)
       setCreateDialogOpen(false)
       window.location.reload() // Refresh to show new device
     } catch (error) {
@@ -112,7 +112,6 @@ export function DataTable<TData>({ columns, data }: DataTableProps<TData>) {
                     className={cx(
                       "whitespace-nowrap py-2.5",
                       cell.column.columnDef.meta?.className,
-                      cell.column.columnDef.meta?.cell,
                     )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

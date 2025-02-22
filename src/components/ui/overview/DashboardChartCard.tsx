@@ -1,6 +1,7 @@
 // Update the ChartCard component to use React.memo to prevent unnecessary re-renders
-import React from "react"
 import { PeriodValue } from "@/app/(main)/overview/page"
+import React from "react"
+// (removed)
 import { Badge } from "@/components/Badge"
 import { LineChart } from "@/components/LineChart"
 import { overviewData } from "@/data/overview-data"
@@ -11,12 +12,12 @@ import {
   interval,
   isWithinInterval,
 } from "date-fns"
+import Link from "next/link"
 import { DateRange } from "react-day-picker"
 import { getPeriod } from "./DashboardFilterbar"
-import Link from "next/link"
 
 export type CardProps = {
-  title: keyof OverviewData
+  title: keyof (typeof overviewData)[number]
   type: "currency" | "unit"
   selectedDates: DateRange | undefined
   selectedPeriod: PeriodValue
@@ -137,14 +138,14 @@ export const ChartCard = React.memo(function ChartCard({
   
   const value = React.useMemo(() => 
     Number(
-      (data?.reduce((acc, item) => acc + (item[title] || 0), 0) || 0).toFixed(4)
+      (data?.reduce((acc, item) => acc + Number(item[title] || 0), 0) || 0).toFixed(4)
     ),
     [data, title]
   )
 
   const previousValue = React.useMemo(() => 
     Number(
-      (prevData?.reduce((acc, item) => acc + (item[title] || 0), 0) || 0).toFixed(4)
+      (prevData?.reduce((acc, item) => acc + Number(item[title] || 0), 0) || 0).toFixed(4)
     ),
     [prevData, title]
   )

@@ -43,9 +43,9 @@ export default function PigDashboard() {
     const fetchPigData = async () => {
       try {
         const [pigResponse, bcsResponse, postureResponse] = await Promise.all([
-          axios.get(`https://iot-pig-monitoring-backend.onrender.com//api/pigs/${params.id}`),
-          axios.get(`https://iot-pig-monitoring-backend.onrender.com/api/pigs/${params.id}/bcs`),
-          axios.get(`https://iot-pig-monitoring-backend.onrender.com//api/pigs/${params.id}/posture`)
+          axios.get(`${process.env.REACT_APP_API_URL}//api/pigs/${params.id}`),
+          axios.get(`${process.env.REACT_APP_API_URL}/api/pigs/${params.id}/bcs`),
+          axios.get(`${process.env.REACT_APP_API_URL}/api/pigs/${params.id}/posture`)
         ])
 
         setPig(pigResponse.data)
