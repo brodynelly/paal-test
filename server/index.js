@@ -9,7 +9,7 @@ const app = express()
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.REACT_APP_API_URL,
+    origin: "https://paal-test.onrender.com/overview",
     methods: ["GET", "POST"]
   }
 })
