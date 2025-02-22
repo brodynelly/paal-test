@@ -1,57 +1,50 @@
 "use client"
 import { siteConfig } from "@/app/siteConfig"
 import { cx, focusRing } from "@/lib/utils"
+import { useUser } from "@clerk/clerk-react"
 import {
+  RiDeviceLine,
   RiHome2Line,
   RiLinkM,
-  RiListCheck,
-  RiSettings5Line,
+  RiListCheck
 } from "@remixicon/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import MobileSidebar from "./MobileSidebar"
-import {
-  WorkspacesDropdownDesktop,
-  WorkspacesDropdownMobile,
-} from "./SidebarWorkspacesDropdown"
-import { UserProfileDesktop, UserProfileMobile } from "./UserProfile"
+import { WorkspacesDropdownDesktop, WorkspacesDropdownMobile } from "./SidebarWorkspacesDropdown"
+import { UserProfileDesktop } from "./UserProfile"
+
 
 const navigation = [
   { name: "Dashboard", href: siteConfig.baseLinks.overview, icon: RiHome2Line },
-  { name: "Details", href: siteConfig.baseLinks.details, icon: RiListCheck },
-  { name: "Support", href: siteConfig.baseLinks.support, icon: RiListCheck }, 
-  {
+  { name: "Pig Tables", href: siteConfig.baseLinks.details, icon: RiListCheck },
+  { name: "Device Data", href: siteConfig.baseLinks.support, icon: RiDeviceLine }, 
+  /* {
     name: "Settings",
     href: siteConfig.baseLinks.settings,
     icon: RiSettings5Line,
   },
+  */
 ] as const
+
 
 const shortcuts = [
   {
-    name: "Add new user",
-    href: "/settings/users",
+    name: "PAAL Landing Page",
+    href: "https://cafnrfaculty.missouri.edu/mupaa/",
     icon: RiLinkM,
   },
   {
-    name: "Workspace usage",
-    href: "/settings/billing#billing-overview",
-    icon: RiLinkM,
-  },
-  {
-    name: "Cost spend control",
-    href: "/settings/billing#cost-spend-control",
-    icon: RiLinkM,
-  },
-  {
-    name: "Overview – Rows written",
-    href: "/overview#usage-overview",
+    name: "Dashboard – Posture Distribution",
+    href: "/metrics/Posture",
     icon: RiLinkM,
   },
 ] as const
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { isSignedIn } = useUser()
+  if (!isSignedIn) return null
   const isActive = (itemHref: string) => {
     // Guard clause to handle undefined href values
     if (!itemHref) return false;
@@ -64,9 +57,10 @@ export function Sidebar() {
   return (
     <>
       {/* sidebar (lg+) */}
+      
       <nav className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <aside className="flex grow flex-col gap-y-6 overflow-y-auto border-r border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-950">
-          {/* <WorkspacesDropdownDesktop /> */}
+          <WorkspacesDropdownDesktop />
           <nav
             aria-label="core navigation links"
             className="flex flex-1 flex-col space-y-10"
@@ -121,15 +115,14 @@ export function Sidebar() {
             
           </nav>
           <div className="mt-auto">
-            {/*  <UserProfileDesktop /> */}
+          <UserProfileDesktop />
           </div>
         </aside>
       </nav>
       {/* top navbar (xs-lg) */}
       <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-2 shadow-sm sm:gap-x-6 sm:px-4 lg:hidden dark:border-gray-800 dark:bg-gray-950">
-        {/* <WorkspacesDropdownMobile /> */}
+         <WorkspacesDropdownMobile /> 
         <div className="flex items-center gap-1 sm:gap-2">
-          <UserProfileMobile />
           <MobileSidebar />
         </div>
       </div>

@@ -2,8 +2,8 @@
 
 import { columns } from "@/components/ui/data-table/columns"
 import { DataTable } from "@/components/ui/data-table/DataTable"
-import { useState, useEffect } from "react"
 import { subscribeToPigs } from "@/lib/socket"
+import { useEffect, useState } from "react"
 
 export default function Example() {
   const [pigData, setPigData] = useState([])
@@ -14,7 +14,7 @@ export default function Example() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/pigs')
+        const response = await fetch('https://iot-pig-monitoring-backend.onrender.com/api/pigs')
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }

@@ -3,9 +3,9 @@
 import { Badge } from "@/components/Badge"
 import { Card } from "@/components/Card"
 import { LineChart } from "@/components/LineChart"
+import axios from "axios"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
-import axios from "axios"
 
 interface PigData {
   pigId: number
@@ -43,9 +43,9 @@ export default function PigDashboard() {
     const fetchPigData = async () => {
       try {
         const [pigResponse, bcsResponse, postureResponse] = await Promise.all([
-          axios.get(`http://localhost:5000/api/pigs/${params.id}`),
-          axios.get(`http://localhost:5000/api/pigs/${params.id}/bcs`),
-          axios.get(`http://localhost:5000/api/pigs/${params.id}/posture`)
+          axios.get(`https://iot-pig-monitoring-backend.onrender.com//api/pigs/${params.id}`),
+          axios.get(`https://iot-pig-monitoring-backend.onrender.com/api/pigs/${params.id}/bcs`),
+          axios.get(`https://iot-pig-monitoring-backend.onrender.com//api/pigs/${params.id}/posture`)
         ])
 
         setPig(pigResponse.data)

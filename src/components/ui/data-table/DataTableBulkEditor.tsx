@@ -1,3 +1,4 @@
+import { Button } from "@/components/Button"
 import {
   CommandBar,
   CommandBarBar,
@@ -5,13 +6,12 @@ import {
   CommandBarSeperator,
   CommandBarValue,
 } from "@/components/CommandBar"
-import { RowSelectionState, Table } from "@tanstack/react-table"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/Dialog"
-import { Button } from "@/components/Button"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/Dialog"
 import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
-import { useState } from "react"
+import { RowSelectionState, Table } from "@tanstack/react-table"
 import axios from "axios"
+import { useState } from "react"
 
 type DataTableBulkEditorProps<TData> = {
   table: Table<TData>
@@ -54,7 +54,7 @@ function DataTableBulkEditor<TData>({
     setIsLoading(true)
     try {
       const pigId = selectedPig.owner.replace('PIG-', '')
-      await axios.put(`http://localhost:5000/api/pigs/${pigId}`, formData)
+      await axios.put(`https://iot-pig-monitoring-backend.onrender.com//api/pigs/${pigId}`, formData)
       window.location.reload() // Refresh to show updated data
     } catch (error) {
       console.error('Error updating pig:', error)
@@ -71,7 +71,7 @@ function DataTableBulkEditor<TData>({
       const selectedPigs = table.getSelectedRowModel().rows.map(row => 
         (row.original as any).owner.replace('PIG-', '')
       )
-      await axios.delete('http://localhost:5000/api/pigs', {
+      await axios.delete('https://iot-pig-monitoring-backend.onrender.com/api/pigs', {
         data: { pigIds: selectedPigs }
       })
       window.location.reload() // Refresh to show updated data

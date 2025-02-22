@@ -4,10 +4,10 @@ import { CategoryBarCard } from "@/components/ui/overview/DashboardCategoryBarCa
 import { ChartCard } from "@/components/ui/overview/DashboardChartCard"
 import { Filterbar } from "@/components/ui/overview/DashboardFilterbar"
 import { ProgressBarCard } from "@/components/ui/overview/DashboardProgressBarCard"
+import { subscribeToStats } from "@/lib/socket"
 import { subDays } from "date-fns"
 import React from "react"
 import { DateRange } from "react-day-picker"
-import { subscribeToStats } from "@/lib/socket"
 
 export type PeriodValue = "previous-period" | "last-year" | "no-comparison"
 

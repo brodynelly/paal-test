@@ -16,10 +16,10 @@ import { ModalAddWorkspace } from "./ModalAddWorkspace"
 
 const workspaces = [
   {
-    value: "retail-analytics",
-    name: "Retail analytics",
-    initials: "RA",
-    role: "Member",
+    value: "paal-analytics",
+    name: "PAAL Pig Research",
+    initials: "PP",
+    role: "Analytics",
     color: "bg-indigo-600 dark:bg-indigo-500",
   },
   // Add more workspaces...
@@ -60,15 +60,15 @@ export const WorkspacesDropdownDesktop = () => {
               className="flex aspect-square size-8 items-center justify-center rounded bg-indigo-600 p-2 text-xs font-medium text-white dark:bg-indigo-500"
               aria-hidden="true"
             >
-              RA
+              PP
             </span>
             <div className="flex w-full items-center justify-between gap-x-4 truncate">
               <div className="truncate">
                 <p className="truncate whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-50">
-                  Retail analytics
+                  PAAL Pig Research
                 </p>
                 <p className="whitespace-nowrap text-left text-xs text-gray-700 dark:text-gray-300">
-                  Member
+                  Analytics
                 </p>
               </div>
               <RiExpandUpDownLine
@@ -90,7 +90,7 @@ export const WorkspacesDropdownDesktop = () => {
         >
           <DropdownMenuGroup>
             <DropdownMenuLabel>
-              Workspaces ({workspaces.length})
+              PAAL Research Labs ({workspaces.length})
             </DropdownMenuLabel>
             {workspaces.map((workspace) => (
               <DropdownMenuItem key={workspace.value}>
@@ -116,12 +116,7 @@ export const WorkspacesDropdownDesktop = () => {
               </DropdownMenuItem>
             ))}
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <ModalAddWorkspace
-            onSelect={handleDialogItemSelect}
-            onOpenChange={handleDialogItemOpenChange}
-            itemName="Add workspace"
-          />
+
         </DropdownMenuContent>
       </DropdownMenu>
     </>
@@ -160,7 +155,7 @@ export const WorkspacesDropdownMobile = () => {
               )}
               aria-hidden="true"
             >
-              RA
+              PP
             </span>
             <RiArrowRightSLine
               className="size-4 shrink-0 text-gray-500"
@@ -168,7 +163,7 @@ export const WorkspacesDropdownMobile = () => {
             />
             <div className="flex w-full items-center justify-between gap-x-3 truncate">
               <p className="truncate whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-50">
-                Retail analytics
+                PAAL Pig
               </p>
               <RiExpandUpDownLine
                 className="size-4 shrink-0 text-gray-500"
@@ -220,7 +215,7 @@ export const WorkspacesDropdownMobile = () => {
           <ModalAddWorkspace
             onSelect={handleDialogItemSelect}
             onOpenChange={handleDialogItemOpenChange}
-            itemName="Add workspace"
+            itemName="Add Dashboard Workspace"
           />
         </DropdownMenuContent>
       </DropdownMenu>

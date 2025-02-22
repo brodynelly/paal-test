@@ -1,4 +1,9 @@
 "use client"
+import { Button } from "@/components/Button"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/Dialog"
+import { Input } from "@/components/Input"
+import { Label } from "@/components/Label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/Select"
 import {
   Table,
   TableBody,
@@ -8,6 +13,7 @@ import {
   TableRow,
 } from "@/components/Table"
 import { cx } from "@/lib/utils"
+import { RiAddLine } from "@remixicon/react"
 import {
   ColumnDef,
   flexRender,
@@ -15,13 +21,9 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { Button } from "@/components/Button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/Dialog"
-import { Input } from "@/components/Input"
-import { Label } from "@/components/Label"
-import { useState } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/Select"
 import axios from "axios"
+import { useState } from "react"
+import { toast } from "react-toastify"
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[]
@@ -56,12 +58,13 @@ export function DataTable<TData>({ columns, data }: DataTableProps<TData>) {
     e.preventDefault()
     setIsLoading(true)
     try {
-      await axios.post('http://localhost:5000/api/devices', formData)
+      await axios.post('https://iot-pig-monitoring-backend.onrender.com/api/devices', formData)
       setCreateDialogOpen(false)
       window.location.reload() // Refresh to show new device
     } catch (error) {
       console.error('Error creating device:', error)
       // Here you would show an error notification
+      toast.error(`Error creating device: ${(error as Error).message}`)
     } finally {
       setIsLoading(false)
     }
@@ -69,11 +72,12 @@ export function DataTable<TData>({ columns, data }: DataTableProps<TData>) {
 
   return (
     <div className="mt-8 space-y-3">
-      <div className="flex justify-end">
-        <Button onClick={() => setCreateDialogOpen(true)}>
-          Add Device
-        </Button>
-      </div>
+        <div className="flex justify-end">
+          <Button onClick={() => setCreateDialogOpen(true)} className="flex items-center gap-2 text-base sm:text-sm">
+            Add Device
+            <RiAddLine className="-mr-0.5 size-5 shrink-0" aria-hidden="true" />
+          </Button>
+        </div>
       <div className="relative overflow-hidden overflow-x-auto">
         <Table>
           <TableHead>

@@ -1,5 +1,4 @@
 "use client"
-import { Button } from "@/components/Button"
 import { Card } from "@/components/Card"
 import { CategoryBar } from "@/components/CategoryBar"
 import { Divider } from "@/components/Divider_S"
@@ -8,9 +7,8 @@ import { ProgressCircle } from "@/components/ProgressCircle_S"
 import { DataTable } from "@/components/ui/data-table-support/DataTable"
 import { columns } from "@/components/ui/data-table-support/columns"
 import { volume } from "@/data/support/volume"
-import { RiAddLine } from "@remixicon/react"
-import React, { useEffect, useState } from "react"
 import { subscribeToDevices } from "@/lib/socket"
+import { useEffect, useState } from "react"
 
 export default function Support() {
   const [devices, setDevices] = useState([])
@@ -33,7 +31,7 @@ export default function Support() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/devices')
+        const response = await fetch('https://iot-pig-monitoring-backend.onrender.com/api/devices')
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
@@ -106,10 +104,6 @@ export default function Support() {
             Real-time monitoring of IoT devices with performance insights
           </p>
         </div>
-        <Button className="flex items-center gap-2 text-base sm:text-sm">
-          Add Device
-          <RiAddLine className="-mr-0.5 size-5 shrink-0" aria-hidden="true" />
-        </Button>
       </div>
       <Divider />
       <dl className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

@@ -11,45 +11,36 @@ import {
 } from "@/components/Drawer"
 import { cx, focusRing } from "@/lib/utils"
 import {
+  RiDeviceLine,
   RiHome2Line,
   RiLinkM,
   RiListCheck,
-  RiMenuLine,
-  RiSettings5Line,
+  RiMenuLine
 } from "@remixicon/react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 const navigation = [
-  { name: "Overview", href: siteConfig.baseLinks.overview, icon: RiHome2Line },
-  { name: "Details", href: siteConfig.baseLinks.details, icon: RiListCheck },
-  { name: "Support", href: siteConfig.baseLinks.support, icon: RiHome2Line }, 
-  {
+  { name: "Dashboard", href: siteConfig.baseLinks.overview, icon: RiHome2Line },
+  { name: "Pig Tables", href: siteConfig.baseLinks.details, icon: RiListCheck },
+  { name: "Device Data", href: siteConfig.baseLinks.support, icon: RiDeviceLine }, 
+  /* {
     name: "Settings",
-    href: siteConfig.baseLinks.settings.general,
+    href: siteConfig.baseLinks.settings,
     icon: RiSettings5Line,
   },
+  */
 ] as const
 
 const shortcuts = [
   {
-    name: "Add new user",
-    href: "/settings/users",
+    name: "PAAL Landing Page",
+    href: "https://cafnrfaculty.missouri.edu/mupaa/",
     icon: RiLinkM,
   },
   {
-    name: "Workspace usage",
-    href: "/settings/billing#billing-overview",
-    icon: RiLinkM,
-  },
-  {
-    name: "Cost spend control",
-    href: "/settings/billing#cost-spend-control",
-    icon: RiLinkM,
-  },
-  {
-    name: "Overview – Rows written",
-    href: "/overview#usage-overview",
+    name: "Dashboard – Posture Distribution",
+    href: "/metrics/Posture",
     icon: RiLinkM,
   },
 ] as const
@@ -79,7 +70,7 @@ export default function MobileSidebar() {
         </DrawerTrigger>
         <DrawerContent className="sm:max-w-lg">
           <DrawerHeader>
-            <DrawerTitle>Retail Analytics</DrawerTitle>
+            <DrawerTitle>Lab Analytics</DrawerTitle>
           </DrawerHeader>
           <DrawerBody>
             <nav
