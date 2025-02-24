@@ -44,7 +44,7 @@ export default function Support() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/devices`)
+        const response = await fetch('/api/devices')
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
