@@ -1,19 +1,4 @@
-# IoT Pig Monitoring System
-
-A comprehensive IoT-based monitoring system for tracking pig health and environmental conditions in real-time. This system helps farmers and veterinarians monitor pig health metrics, environmental conditions, and automate data collection for better livestock management.
-
-## Features
-
-- Real-time monitoring of:
-  - Body Condition Score (BCS)
-  - Posture Analysis
-  - Environmental Temperature
-  - Device Status
-- Interactive dashboards with historical data visualization
-- Automated alerts for critical conditions
-- Device management system
-- Detailed pig health records
-- Group-based monitoring
+# PAAL Research Web Page
 
 ## Tech Stack
 
