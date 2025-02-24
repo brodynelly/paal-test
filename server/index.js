@@ -9,7 +9,7 @@ const app = express()
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
   cors: {
-    origin: "https://paal-test.onrender.com",
+    origin: "ws://paal-test.onrender.com",
     methods: ["GET", "POST"],
     credentials: true
     
