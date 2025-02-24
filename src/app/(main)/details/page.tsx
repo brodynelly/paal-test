@@ -14,7 +14,7 @@ export default function Example() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const response = await fetch(`$(process.env.REACT_APP_API_URL)/api/pigs`))
+        const response = await fetch(`$(process.env.REACT_APP_API_URL)/api/pigs`)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
