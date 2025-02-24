@@ -25,8 +25,8 @@
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/iot-pig-monitoring.git
-cd iot-pig-monitoring
+git clone https://github.com/brodynelly/paal-test.git
+cd paal-test.git
 ```
 
 2. Install dependencies:
@@ -39,8 +39,7 @@ pnpm install
 3. Set up environment variables:
 Create a `.env` file in the root directory with:
 ```env
-MONGODB_URI=your_mongodb_connection_string
-PORT=5000
+// ask me for .env variables, will not post publically 
 ```
 
 4. Seed the database:
