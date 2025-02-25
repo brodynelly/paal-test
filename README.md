@@ -75,6 +75,19 @@ git commit -m "Add Docker config for local development and MongoDB container"
     Logs: If needed, check logs with docker-compose logs mongodb for any issues.
 
 This will start both the frontend (port 3000) and backend (port 5000) servers concurrently.
+
+## RUNNING the Database 
+Run the Container:
+In your repository, run:
+```
+docker-compose up -d
+```
+
+This starts the MongoDB container in detached mode.
+
+Backup Script:
+With the container running, the (backup_to_github.sh) can execute mongodump inside mongo_container to export the data, archive it, and then commit it to the github repo. `instructions are down below`
+
 ## Backing up the Database 
 We are using an automated scripted called `backup_to_github.sh` that is running on the linux machine to create a dump of the mongodb database, so every developer can work with the same data across any local machine. 
 
