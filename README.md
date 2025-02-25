@@ -68,17 +68,3 @@ This will start both the frontend (port 3000) and backend (port 5000) servers co
 │   └── types/        # TypeScript type definitions
 ```
 
-## API Endpoints
-
-- `/api/stats` - Get system statistics
-- `/api/devices` - Device management
-- `/api/pigs` - Pig data management
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -a`)
-3. Commit your changes (`git commit -m 'Added something'`)
-4. Push to the branch (`git push origin dev`)
-5. Open a Pull Request
-
