@@ -1,5 +1,4 @@
 # PAAL Research Web Page
-# PAAL Research Web Page
 
 Hello team,  
 Below you'll find the technical overview, setup instructions, and our workflow guidelines for the PAAL Research Web Page project. Let's ensure we maintain consistency across our development environments.
