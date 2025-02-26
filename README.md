@@ -112,6 +112,7 @@ We are using an automated scripted called `backup_to_github.sh` that is running 
 Run:
 ```
 chmod +x backup_to_github.sh
+./backup_to_github.sh
 ```
 
 ### 2. Restoring Backups:
