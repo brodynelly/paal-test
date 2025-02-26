@@ -1,18 +1,5 @@
 /**
  * seed.js
- *
- * Generates 40 documents in each of the following collections:
- *   - Device
- *   - Pig
- *   - BCSData
- *   - PostureData
- *   - TemperatureData
- *
- * Each collection references each other in a consistent way:
- *   - pigId in [1..40]
- *   - deviceId in [1..40]
- *   - recordId in [1..40] for BCS/Posture/Temperature
- *
  * Usage:
  *   1) Create a .env file with MONGODB_URI=your_connection_string
  *   2) Run: node seed.js
@@ -22,11 +9,19 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 
 // Import Models (adjust paths if your structure differs)
-const Device = require('./models/Device');
+const Farm = require('./models/Farm');
+const Barn = require('./models/Barn');
+const Stall = require('./models/Stall');
 const Pig = require('./models/Pig');
-const BCSData = require('./models/BCSData');
-const PostureData = require('./models/PostureData');
-const TemperatureData = require('./models/TemperatureData');
+const PigHealthStatus = require('./models/PigHealthStatus');
+const PigFertility = require('./models/PigFertility');
+const PigHeatStatus = require('./models/PigHeatStatus');
+const PigPosture = require('./models/PostureData');
+const PigBCS = require('./models/BCSData');
+const PigVulvaSwelling = require('./models/PigVulvaSwelling');
+const PigBreathRate = require('./models/PigBreathRate');
+const Device = require('./models/Device');
+const DeviceData = require('./models/TemperatureData');
 
 /** Helpers for random data generation */
 function getRandomItem(arr) {
@@ -43,11 +38,17 @@ function getRandomFloat(min, max, decimals = 1) {
   return Math.round((Math.random() * (max - min) + min) * scale) / scale;
 }
 
-function getRandomDateWithinLastDays(days = 30) {
+/**
+ * Generate 30 timestamps spread over the last 30 days (one per day)
+ */
+function getDailyTimestamps(days = 30) {
+  const timestamps = [];
   const now = Date.now();
-  const past = now - days * 24 * 60 * 60 * 1000;
-  const randomTime = getRandomInt(past, now);
-  return new Date(randomTime);
+  const oneDay = 24 * 60 * 60 * 1000;
+  for (let i = days - 1; i >= 0; i--) {
+    timestamps.push(new Date(now - i * oneDay));
+  }
+  return timestamps;
 }
 
 async function seedDatabase() {
@@ -58,90 +59,188 @@ async function seedDatabase() {
 
     // 2. Clear existing data (optional but recommended for a fresh start)
     await Promise.all([
-      Device.deleteMany({}),
+      Farm.deleteMany({}),
+      Barn.deleteMany({}),
+      Stall.deleteMany({}),
       Pig.deleteMany({}),
-      BCSData.deleteMany({}),
-      PostureData.deleteMany({}),
-      TemperatureData.deleteMany({})
+      PigHealthStatus.deleteMany({}),
+      PigFertility.deleteMany({}),
+      PigHeatStatus.deleteMany({}),
+      PigPosture.deleteMany({}),
+      PigBCS.deleteMany({}),
+      PigVulvaSwelling.deleteMany({}),
+      PigBreathRate.deleteMany({}),
+      Device.deleteMany({}),
+      DeviceData.deleteMany({})
     ]);
 
-    // 3. Create 40 Devices
-    const statusList = ['online', 'offline', 'warning'];
-    const devicesData = [];
-    for (let i = 1; i <= 40; i++) {
-      devicesData.push({
+    // 3. Create 2 Farms
+    const farms = [];
+    for (let i = 1; i <= 2; i++) {
+      const farm = await Farm.create({
+        name: `Farm ${i}`,
+        location: `Location ${i}`
+      });
+      farms.push(farm);
+    }
+
+    // 4. Create 3 Barns per Farm
+    const barns = [];
+    for (let farm of farms) {
+      for (let j = 1; j <= 3; j++) {
+        const barn = await Barn.create({
+          name: `Barn ${j}`,
+          farmId: farm._id
+        });
+        barns.push(barn);
+      }
+    }
+
+    // 5. Create 5 Stalls per Barn
+    const stalls = [];
+    for (let barn of barns) {
+      for (let k = 1; k <= 5; k++) {
+        const stall = await Stall.create({
+          name: `Stall ${k}`,
+          barnId: barn._id, // reference to Barn
+          farmId: barn.farmId
+        });
+        stalls.push(stall);
+      }
+    }
+
+    // Pig Breeds -- for random selection
+    const pigBreeds = ['Yorkshire', 'Landrace', 'Duroc',
+      'Berkshire', 'Hampshire', 'Chester White', 'Tamworth'];
+
+    let stallCount = 0; // for unique pig ids
+    // 6. Create Pigs for each Stall (4-6 pigs per stall)
+    const pigs = [];
+    for (let stall of stalls) {
+      const pigCount = getRandomInt(4, 6);
+      for (let p = 1; p <= pigCount; p++) {
+        const pig = await Pig.create({
+          pigId: stallCount + p,              // unique pig id (within the stall)
+          tag: `Tag-${p}`,                // unique tag for each pig
+          /* grabbing farm and barn id from stall */
+          currentLocation: { stallId: stall._id, barnId: stall.barnId, farmId: stall.farmId },
+          lastUpdate: new Date(),
+          breed: getRandomItem(pigBreeds),
+          age: getRandomInt(1, 36),        // random months in age
+          active: true
+        });
+        pigs.push(pig);
+      }
+      stallCount += pigCount; // increment for unique pig ids
+    }
+
+    // 7. Generate 30 daily timestamps (one for each day of the month)
+    const timestamps = getDailyTimestamps(30);
+
+    // Time series value options
+    const healthStatuses = ['at risk', 'healthy', 'critical', 'no movement'];
+    const fertilityStatuses = ['in heat', 'Pre-Heat', 'Open', 'ready to breed'];
+    const heatStatuses = ['open', 'bred', 'pregnant', 'farrowing', 'weaning'];
+    const vulvaSwellingValues = ['low', 'moderate', 'high'];
+
+    // 8. Populate time series data for each pig (30 entries per metric)
+    for (let pig of pigs) {
+      // Health Status entries
+      const healthEntries = timestamps.map(ts => ({
+        pigId: pig._id,
+        timestamp: ts,
+        status: getRandomItem(healthStatuses)
+      }));
+      await PigHealthStatus.insertMany(healthEntries);
+
+      // Fertility entries
+      const fertilityEntries = timestamps.map(ts => ({
+        pigId: pig._id,
+        timestamp: ts,
+        status: getRandomItem(fertilityStatuses)
+      }));
+      await PigFertility.insertMany(fertilityEntries);
+
+      // Heat Status entries
+      const heatEntries = timestamps.map(ts => ({
+        pigId: pig._id,
+        timestamp: ts,
+        status: getRandomItem(heatStatuses)
+      }));
+      await PigHeatStatus.insertMany(heatEntries);
+
+      // Posture entries (score between 1 and 5)
+      const postureEntries = timestamps.map(ts => ({
+        pigId: pig._id,
+        timestamp: ts,
+        score: getRandomInt(1, 5)
+      }));
+      await PigPosture.insertMany(postureEntries);
+
+      // BCS entries (score between 2.0 and 4.0)
+      const bcsEntries = timestamps.map(ts => ({
+        pigId: pig._id,
+        timestamp: ts,
+        score: getRandomFloat(2, 4, 1)
+      }));
+      await PigBCS.insertMany(bcsEntries);
+
+      // Vulva Swelling entries
+      const vulvaEntries = timestamps.map(ts => ({
+        pigId: pig._id,
+        timestamp: ts,
+        value: getRandomItem(vulvaSwellingValues)
+      }));
+      await PigVulvaSwelling.insertMany(vulvaEntries);
+
+      // Breath Rate entries (value between 15 and 30)
+      const breathEntries = timestamps.map(ts => ({
+        pigId: pig._id,
+        timestamp: ts,
+        rate: getRandomInt(15, 30)
+      }));
+      await PigBreathRate.insertMany(breathEntries);
+
+      // Update the pig's lastUpdate to the latest timestamp
+      await Pig.findByIdAndUpdate(pig._id, { lastUpdate: timestamps[timestamps.length - 1] });
+    }
+
+    // 9. Create 10 Devices (Realtime Temperature Sensors)
+    const deviceStatus = ['online', 'offline', 'warning'];
+    const devices = [];
+    for (let i = 1; i <= 10; i++) {
+      const device = await Device.create({
         deviceId: i,
-        deviceName: `TempSensor-${i}`,
+        deviceName: `Sensor-${i}`,
         deviceType: 'Temperature',
-        status: getRandomItem(statusList),
-        temperature: getRandomFloat(20, 30, 1), // random between 20.0 and 30.0
+        status: getRandomItem(deviceStatus),
+        temperature: getRandomFloat(20, 30, 1)
       });
+      devices.push(device);
     }
-    const devices = await Device.create(devicesData);
 
-    // 4. Create 40 Pigs
-    const pigBreeds = ['Large White', 'Yorkshire', 'Duroc', 'Hampshire', 'Berkshire'];
-    const pigsData = [];
-    for (let i = 1; i <= 40; i++) {
-      pigsData.push({
-        pigId: i,
-        groupId: getRandomInt(1, 5), // random group 1..5
-        breed: getRandomItem(pigBreeds),
-        age: getRandomInt(1, 36),        // random months in age
-        bcsScore: getRandomFloat(2, 4),  // typical BCS range, can be 2.0..4.0
-        posture: getRandomInt(1, 3)      // 1..3
-      });
+    // 10. Create DeviceData for each Device (30 entries per device for the month)
+    let p = 1; // cheap fix for unique record id, should fix later
+    for (let device of devices) {
+      const deviceDataEntries = timestamps.map(ts => ({
+        recordId: p++, // cheap fix unique record id, should fix later
+        deviceId: device.deviceId, 
+        timestamp: ts,
+        temperature: getRandomFloat(20, 30, 1)
+      }));
+      await DeviceData.insertMany(deviceDataEntries);
     }
-    const pigs = await Pig.create(pigsData);
 
-    // 5. Create 40 BCSData entries (one per pigId)
-    const bcsDataArray = [];
-    for (let i = 1; i <= 40; i++) {
-      bcsDataArray.push({
-        recordId: i,                     // required/unique
-        pigId: i,                        // one-to-one for demonstration
-        bcsScore: getRandomFloat(2, 4),
-        timestamp: getRandomDateWithinLastDays(30) // random date in last 30 days
-      });
-    }
-    const bcsData = await BCSData.create(bcsDataArray);
-
-    // 6. Create 40 PostureData entries (one per pigId)
-    const postureDataArray = [];
-    for (let i = 1; i <= 40; i++) {
-      postureDataArray.push({
-        recordId: i,
-        pigId: i,
-        posture: getRandomInt(1, 3), // e.g., 1..3
-        timestamp: getRandomDateWithinLastDays(30)
-      });
-    }
-    const postureData = await PostureData.create(postureDataArray);
-
-    // 7. Create 40 TemperatureData entries (one per deviceId)
-    const temperatureDataArray = [];
-    for (let i = 1; i <= 40; i++) {
-      temperatureDataArray.push({
-        recordId: i,
-        deviceId: i,
-        temperature: getRandomFloat(20, 30),
-        timestamp: getRandomDateWithinLastDays(30)
-      });
-    }
-    const temperatureData = await TemperatureData.create(temperatureDataArray);
-
-    // 8. Confirm success
     console.log('\nDatabase seeded successfully!');
     console.log(`
       Created:
-        - ${devices.length} Devices
+        - ${farms.length} Farms
+        - ${barns.length} Barns
+        - ${stalls.length} Stalls
         - ${pigs.length} Pigs
-        - ${bcsData.length} BCSData records
-        - ${postureData.length} PostureData records
-        - ${temperatureData.length} TemperatureData records
+        - Realtime data for ${devices.length} Devices
     `);
 
-    // 9. Close the script
     process.exit(0);
   } catch (error) {
     console.error('Error seeding database:', error);

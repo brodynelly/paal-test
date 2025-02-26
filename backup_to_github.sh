@@ -1,11 +1,9 @@
-#!/bin/bash
 # Automated backup script for MongoDB running in Docker.
 # This script will:
 # 1. Dump the database using mongodump.
 # 2. Archive the dump into a timestamped file.
 # 3. Commit and push the backup file to your GitHub branch.
 #
-# Ensure that Git is already set up for passwordless commits (via SSH keys or a credential helper).
 
 # Configuration variables (customize these as needed)
 CONTAINER_NAME="mongo_container"
