@@ -55,7 +55,7 @@ This command creates a new branch named LocalDev and switches you to it. All cha
 ### 3. Set up environment variables:
 Create a `.env.local` file in the root directory with:
 ```env
-MONGO_URI=mongodb://localhost:27017/your_database_name
+MONGO_URI=mongodb://localhost:27017/mongodb_test
 ```
 
 ### 4. Start Mongo Db for Local Development 
