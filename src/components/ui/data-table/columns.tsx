@@ -1,18 +1,18 @@
 "use client"
-
 import { Badge } from "@/components/Badge"
 import { Checkbox } from "@/components/Checkbox"
 import { healthStatuses } from "@/data/data"
 import { Usage } from "@/data/schema"
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table"
+import Link from "next/link"
 import { DataTableColumnHeader } from "./DataTableColumnHeader"
 import { ConditionFilter } from "./DataTableFilter"
 import { DataTableRowActions } from "./DataTableRowActions"
-import Link from "next/link"
 
 const columnHelper = createColumnHelper<Usage>()
 
 export const columns = [
+  
   columnHelper.display({
     id: "select",
     header: ({ table }) => (
@@ -212,6 +212,11 @@ export const columns = [
       className: "text-right",
       displayName: "Edit",
     },
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    cell: ({ row, table }) => (
+      <DataTableRowActions
+        row={row}
+        table={table}
+      />
+    ),
   }),
 ] as ColumnDef<Usage>[]

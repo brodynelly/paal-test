@@ -6,8 +6,10 @@
 .pnp.js
 .yarn/install-state.gz
 
-/data
+/.data/
 /data/db
+
+/database/sslkey
 
 # testing
 /coverage

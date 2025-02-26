@@ -3,18 +3,20 @@
 import { Button } from "@/components/Button"
 import { Searchbar } from "@/components/Searchbar"
 import { conditions, healthStatuses, pigGroups } from "@/data/data"
-import { RiDownloadLine } from "@remixicon/react"
+import { RiAddLine, RiDownloadLine } from "@remixicon/react"
 import { Table } from "@tanstack/react-table"
-import { useState } from "react"
+import React, { useState } from "react"; // for adding in event listeners for opening adding button
 import { useDebouncedCallback } from "use-debounce"
 import { DataTableFilter } from "./DataTableFilter"
 import { ViewOptions } from "./DataTableViewOptions"
+import { PigDrawer } from "./NewDrawer"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
 }
 
 export function Filterbar<TData>({ table }: DataTableToolbarProps<TData>) {
+  const [isOpen, setIsOpen] = React.useState(false)
   const isFiltered = table.getState().columnFilters.length > 0
   const [searchTerm, setSearchTerm] = useState<string>("")
 
@@ -74,7 +76,18 @@ export function Filterbar<TData>({ table }: DataTableToolbarProps<TData>) {
           </Button>
         )}
       </div>
+      
       <div className="flex items-center gap-2">
+        {/*  add option for adding a pig */ }
+        <Button
+          onClick={() => setIsOpen(true)}
+          variant="secondary"
+          className="hidden gap-x-2 px-2 py-1.5 text-sm sm:text-xs lg:flex"
+        >
+          <RiAddLine className="size-4 shrink-0" aria-hidden="true" />
+          Add
+        </Button>
+        <PigDrawer open={isOpen} onOpenChange={setIsOpen} />
         <Button
           variant="secondary"
           className="hidden gap-x-2 px-2 py-1.5 text-sm sm:text-xs lg:flex"

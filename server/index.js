@@ -14,7 +14,7 @@ const io = new Server(httpServer, {
   }
 })
 
-const port = process.env.PORT || 5000
+const port = 5005
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Middleware
@@ -46,7 +46,7 @@ const DATABASE_DB = process.env.MONGO_INITDB_DATABASE
 const DATABASE_USERNAME = process.env.MONGO_INITDB_ROOT_USERNAME
 const DATABASE_PASSWORD = process.env.MONGO_INITDB_ROOT_PASSWORD
 
-const URI = `mongodb://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}?authSource=admin`
+const URI = `mongodb://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}?replicaSet=rs0&authSource=admin`;
 
 mongoose.connect(URI)
   .then(() => {
@@ -159,12 +159,18 @@ const emitUpdatedStats = async () => {
     }))
 
     // Transform pigs for UI
+    const selectedPig = pigs.find((pig) => pig._id === formData.pigId)
+    const stallId = selectedPig ? selectedPig.stall : null
+
+
+    
     const transformedPigs = pigs.map(pig => ({
+      
       owner: `PIG-${pig.pigId.toString().padStart(3, '0')}`,
       status: pig.bcsScore >= 4 ? "critical" : pig.bcsScore >= 3 ? "healthy" : "suspicious",
       costs: pig.age,
-      region: `Group ${pig.groupId}`,
-      stability: Math.floor(Math.random() * 100), // random example
+      region: stallId, 
+      stability: pig.stability, // random example
       lastEdited: pig.lastUpdate
         ? new Date(pig.lastUpdate).toLocaleDateString('en-GB', {
             day: '2-digit', month: '2-digit', year: 'numeric',
@@ -213,5 +219,5 @@ setInterval(emitUpdatedStats, 5000)
 
 
 httpServer.listen(port, () => {
-  console.log('Server running on port ${port}')
+  console.log(`Server running on port ${port}`)
 })

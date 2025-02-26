@@ -14,7 +14,7 @@ const DATABASE_DB = process.env.MONGO_INITDB_DATABASE;
 const DATABASE_USERNAME = process.env.MONGO_INITDB_ROOT_USERNAME; 
 const DATABASE_PASSWORD = process.env.MONGO_INITDB_ROOT_PASSWORD;
 
-const URI = `mongodb://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}?authSource=admin`;
+const URI = `mongodb://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}?replicaSet=rs0&authSource=admin`;
 
 // Import Models (adjust paths if your structure differs)
 const Farm = require('./models/Farm');
