@@ -6,9 +6,9 @@
 #
 
 # Configuration variables (customize these as needed)
-CONTAINER_NAME="mongo_container"
+CONTAINER_NAME="mongodb_dev" # Name of your MongoDB container
 BACKUP_DIR="./backup"       # Directory within your repository to store backups
-BRANCH="LocalDev"           # Git branch to push backups to
+BRANCH="localDevDev"           # Git branch to push backups to
 
 # Create backup directory if it doesn't exist
 mkdir -p "$BACKUP_DIR"
