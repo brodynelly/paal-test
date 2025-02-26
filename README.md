@@ -23,34 +23,8 @@
 
 ## Getting Started
 
-1. Clone the repository:
-```bash
-git clone https://github.com/brodynelly/paal-test.git
-cd paal-test.git
-```
-
-2. Install dependencies:
-```bash
-npm install
-# or
-pnpm install
-```
-
-3. Set up environment variables:
-Create a `.env` file in the root directory with:
-```env
-// ask me for .env variables, will not post publically 
-```
-
-4. Seed the database:
-```bash
-npm run seed
-```
-
-5. Start the development servers:
-```bash
-npm run dev
-```
+### For contribution and editing for this project, please refer to this site here: 
+`https://github.com/brodynelly/paal-test/tree/localDev?tab=readme-ov-file#getting-started`
 
 This will start both the frontend (port 3000) and backend (port 5000) servers concurrently.
 
