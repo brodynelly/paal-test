@@ -3,7 +3,7 @@
 import { Badge } from "@/components/Badge"
 import { Card } from "@/components/Card"
 import { LineChart } from "@/components/LineChart"
-import axios from "axios"
+import api from "@/lib/axios"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -36,15 +36,15 @@ export default function DeviceDashboard() {
     const fetchDeviceData = async () => {
       try {
         // Fetch device details
-        const deviceResponse = await axios.get(`https://iot-pig-monitoring-backend.onrender.com/api/devices/${params.id}`)
+        const deviceResponse = await api.get(`devices/${params.id}`)
         setDevice(deviceResponse.data)
 
         // Fetch temperature history
-        const tempResponse = await axios.get(`https://iot-pig-monitoring-backend.onrender.com/api/devices/${params.id}/temperature`)
+        const tempResponse = await api.get(`devices/${params.id}/temperature`)
         setTemperatureHistory(tempResponse.data)
 
         // Fetch associated pig if any
-        const pigResponse = await axios.get(`https://iot-pig-monitoring-backend.onrender.com/api/devices/${params.id}/pig`)
+        const pigResponse = await api.get(`devices/${params.id}/pig`)
         if (pigResponse.data.pigId) {
           setAssociatedPig(pigResponse.data.pigId)
         }
