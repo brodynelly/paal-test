@@ -1,12 +1,20 @@
 /**
  * seed.js
  * Usage:
- *   1) Create a .env file with MONGODB_URI=your_connection_string
  *   2) Run: node seed.js
  */
 
 require('dotenv').config();
 const mongoose = require('mongoose');
+
+// MongoDB connection details from environment variables
+const DATABASE_HOST = process.env.DATABASE_HOST; 
+const DATABASE_PORT = process.env.DATABASE_PORT;
+const DATABASE_DB = process.env.MONGO_INITDB_DATABASE;
+const DATABASE_USERNAME = process.env.MONGO_INITDB_ROOT_USERNAME; 
+const DATABASE_PASSWORD = process.env.MONGO_INITDB_ROOT_PASSWORD;
+
+const URI = `mongodb://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}?authSource=admin`;
 
 // Import Models (adjust paths if your structure differs)
 const Farm = require('./models/Farm');
@@ -53,8 +61,11 @@ function getDailyTimestamps(days = 30) {
 
 async function seedDatabase() {
   try {
-    // 1. Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI);
+    // 1. Connect to MongoDB using Mongoose
+    await mongoose.connect(URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     console.log('Connected to MongoDB');
 
     // 2. Clear existing data (optional but recommended for a fresh start)

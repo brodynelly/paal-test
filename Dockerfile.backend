@@ -1,0 +1,20 @@
+# Use an official Node runtime as a base image
+FROM node:18
+
+# Set the working directory inside the container
+WORKDIR /usr/src/app
+
+# Copy only package files first for caching dependencies
+COPY package*.json ./
+
+# Install only production dependencies (adjust if you need dev dependencies)
+RUN npm install
+
+# Copy the server code (assuming your Node back end is in the "server" folder)
+COPY server ./server
+
+# Expose the port your backend listens on (adjust if needed)
+EXPOSE 5005
+
+# Start the back end using your start script
+CMD ["node", "./server/index.js"]

@@ -22,6 +22,7 @@ const PigSchema = new Schema({
   breed: { type: String },
   age: { type: Number },
   currentLocation: {
+    farmId: { type: Schema.Types.ObjectId, ref: 'Farm', required: true },
     barnId: { type: Schema.Types.ObjectId, ref: 'Barn', required: true },
     stallId: { type: Schema.Types.ObjectId, ref: 'Stall', required: true }
   },
