@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client'
 
-const SOCKET_URL = "wss://paal-tgbf.onrender.com"
+const SOCKET_URL = "http://localhost:5005"
 
 export const socket = io(SOCKET_URL, {
   transports: ['websocket'],

@@ -1,9 +1,53 @@
-version: '3.8'
+version: "3.8"
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb_dev
+  mongo:
+    image: mongo:latest # Change 'server:1.0.1' to official mongo image
+    container_name: ${DATABASE_HOST}
     ports:
-      - "27017:27017"
+      - ${DATABASE_PORT}:${DATABASE_PORT}
+    networks:
+      - app-net
     volumes:
-      - ./data/db:/data/db  # persists data locally (optional)
+      - database-v:/data/db
+    command: [ "mongod", "--replSet", "rs0" ]
+
+  backend:
+    image: server:1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: ${SERVER_HOST}
+    depends_on:
+      - mongo
+    networks:
+      - app-net
+    env_file: .env
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    volumes:
+      - ./server:/server
+      - server-v-node-modules:/server/node_modules
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: frontend
+    depends_on:
+      - backend
+    networks:
+      - app-net
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+
+networks:
+  app-net:
+    driver: bridge
+
+volumes:
+  server-v-node-modules:
+    name: "server-v-node-modules"
+  database-v:
+    name: "database-v"
