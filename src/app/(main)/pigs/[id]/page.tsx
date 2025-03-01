@@ -3,32 +3,41 @@
 import { Badge } from "@/components/Badge"
 import { Card } from "@/components/Card"
 import { LineChart } from "@/components/LineChart"
-import axios from "axios"
+import api from "@/lib/axios"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
 interface PigData {
-  pigId: number
-  groupId: number
-  breed: string
-  age: number
-  bcsScore: number
-  posture: number
-  lastUpdate: string
+  _id: string;  // The MongoDB ObjectId as a string
+  pigId: number; // Numeric pig ID
+  tag: string;
+  breed: string;
+  age: number;
+  lastUpdate: string;  // ISO 8601 formatted date-time string
+  active: boolean;
+  currentLocation: {
+    farmId: string;
+    barnId: string;
+    stallId: string;
+  };
+  __v: number; // Version key, can be omitted in some cases
 }
 
+
 interface BCSData {
-  recordId: number
-  pigId: number
-  bcsScore: number
-  timestamp: string
+  _id: string;  // The MongoDB ObjectId as a string
+  pigId: number;  // Numeric pig ID
+  timestamp: string;  // ISO 8601 formatted date-time string
+  score: number;  // BCS score value
+  __v: number; // Version key, can be omitted in some cases
 }
 
 interface PostureData {
-  recordId: number
-  pigId: number
-  posture: number
-  timestamp: string
+  _id: string;  // The MongoDB ObjectId as a string
+  pigId: number;  // Numeric pig ID
+  timestamp: string;  // ISO 8601 formatted date-time string
+  score: number;  // Posture score
+  __v: number; // Version key, can be omitted in some cases
 }
 
 export default function PigDashboard() {
@@ -43,9 +52,9 @@ export default function PigDashboard() {
     const fetchPigData = async () => {
       try {
         const [pigResponse, bcsResponse, postureResponse] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_API_URL}//api/pigs/${params.id}`),
-          axios.get(`${process.env.REACT_APP_API_URL}/api/pigs/${params.id}/bcs`),
-          axios.get(`${process.env.REACT_APP_API_URL}/api/pigs/${params.id}/posture`)
+          api.get(`/pigs/${params.id}`),
+          api.get(`/pigs/${params.id}/bcs`),
+          api.get(`/pigs/${params.id}/posture`)
         ])
 
         setPig(pigResponse.data)
@@ -90,10 +99,10 @@ export default function PigDashboard() {
             Pig {pig.pigId}
           </h1>
           <p className="text-sm text-gray-500">
-            Group {pig.groupId} • {pig.breed}
+            Group {pig.currentLocation.stallId} • {pig.breed}
           </p>
         </div>
-        {getBCSStatusBadge(pig.bcsScore)}
+        {getBCSStatusBadge(pig.age)}
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -103,7 +112,7 @@ export default function PigDashboard() {
             <LineChart
               data={bcsHistory.map(record => ({
                 date: record.timestamp,
-                "BCS Score": record.bcsScore
+                "BCS Score": record.score
               }))}
               index="date"
               categories={["BCS Score"]}
@@ -120,7 +129,7 @@ export default function PigDashboard() {
             <LineChart
               data={postureHistory.map(record => ({
                 date: record.timestamp,
-                "Posture": record.posture
+                "Posture": record.score
               }))}
               index="date"
               categories={["Posture"]}
@@ -143,13 +152,13 @@ export default function PigDashboard() {
             <div>
               <dt className="text-sm font-medium text-gray-500">Current BCS</dt>
               <dd className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-50">
-                {pig.bcsScore.toFixed(1)}
+                {postureHistory.at.length.toFixed(1)}
               </dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Current Posture</dt>
               <dd className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-50">
-                {pig.posture}
+                {postureHistory.at.length.toFixed(1)}
               </dd>
             </div>
             <div>
@@ -165,16 +174,6 @@ export default function PigDashboard() {
           <h3 className="text-lg font-medium">Health Analysis</h3>
           <div className="mt-4 space-y-4">
             <p className="text-sm text-gray-500">
-              Based on the current BCS score of {pig.bcsScore.toFixed(1)}, this pig is{' '}
-              {pig.bcsScore >= 4 ? 'showing concerning signs and requires immediate attention' :
-               pig.bcsScore >= 3 ? 'maintaining a healthy condition' :
-               'showing signs that require attention'}.
-            </p>
-            <p className="text-sm text-gray-500">
-              Posture readings indicate {pig.posture === 1 ? 'normal standing behavior' :
-                                      pig.posture === 2 ? 'typical lying position' :
-                                      pig.posture === 3 ? 'sitting position' :
-                                      'active movement'}.
             </p>
           </div>
         </Card>

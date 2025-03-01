@@ -58,11 +58,29 @@ router.get('/:id', async (req, res) => {
 // Get pig BCS history
 router.get('/:id/bcs', async (req, res) => {
   try {
-    const bcsData = await BCSData.find({ pigId: parseInt(req.params.id) })
+
+    // all of the bcs tables are calling the obj id, we need to fix this by: 
+    //    1. calling the pigId and then 
+    //    2. finding the obj id
+
+     // Step 1: Find the corresponding ObjectId for the pigId (which is a number)
+     const pig = await Pig.findOne({ pigId: parseInt(req.params.id) });
+
+     if (!pig) {
+       return res.status(404).json({ error: 'Pig not found' });
+     }
+
+    const bcsData = await BCSData.find({  pigId: pig._id  })
       .sort({ timestamp: -1 })
       .limit(100)
 
-    res.json(bcsData)
+    // Step 3: Manipulate the bcsData to include the pigId in the result
+    const result = bcsData.map((data) => ({
+      ...data.toObject(),
+      pigId: pig.pigId  // replace the pigId with the original pigId
+    }));
+
+    res.json(result)
   } catch (error) {
     console.error('Error fetching BCS data:', error)
     res.status(500).json({ error: 'Failed to fetch BCS data' })
@@ -72,11 +90,28 @@ router.get('/:id/bcs', async (req, res) => {
 // Get pig posture history
 router.get('/:id/posture', async (req, res) => {
   try {
-    const postureData = await PostureData.find({ pigId: parseInt(req.params.id) })
+    // all of the bcs tables are calling the obj id, we need to fix this by: 
+    //    1. calling the pigId and then 
+    //    2. finding the obj id
+
+     // Step 1: Find the corresponding ObjectId for the pigId (which is a number)
+    const pig = await Pig.findOne({ pigId: parseInt(req.params.id) });
+
+    if (!pig) {
+      return res.status(404).json({ error: 'Pig not found' });
+    }
+
+    const postureData = await PostureData.find({ pigId: pig._id })
       .sort({ timestamp: -1 })
       .limit(100)
 
-    res.json(postureData)
+    // Step 3: Manipulate the bcsData to include the pigId in the result
+    const result = postureData.map((data) => ({
+      ...data.toObject(),
+      pigId: pig.pigId  // replace the pigId with the original pigId
+    }));
+
+    res.json(result)
   } catch (error) {
     console.error('Error fetching posture data:', error)
     res.status(500).json({ error: 'Failed to fetch posture data' })

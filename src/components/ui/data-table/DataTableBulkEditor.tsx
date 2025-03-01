@@ -9,6 +9,7 @@ import {
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/Dialog"
 import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
+import api from "@/lib/axios"
 import { RowSelectionState, Table } from "@tanstack/react-table"
 import axios from "axios"
 import { useState } from "react"
@@ -54,7 +55,7 @@ function DataTableBulkEditor<TData>({
     setIsLoading(true)
     try {
       const pigId = selectedPig.owner.replace('PIG-', '')
-      await axios.put(`${process.env.REACT_APP_API_URL}/api/pigs/${pigId}`, formData)
+      await axios.put(`http://localhost:5005/api/pigs/${pigId}`, formData)
       window.location.reload() // Refresh to show updated data
     } catch (error) {
       console.error('Error updating pig:', error)
@@ -71,7 +72,7 @@ function DataTableBulkEditor<TData>({
       const selectedPigs = table.getSelectedRowModel().rows.map(row => 
         (row.original as any).owner.replace('PIG-', '')
       )
-      await axios.delete(`${process.env.REACT_APP_API_URL}/api/pigs`, {
+      await api.delete(`http://localhost:5005/api/pigs`, {
         data: { pigIds: selectedPigs }
       })
       window.location.reload() // Refresh to show updated data
