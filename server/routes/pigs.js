@@ -3,6 +3,7 @@ const router = express.Router()
 const Pig = require('../models/Pig')
 const BCSData = require('../models/BCSData')
 const PostureData = require('../models/PostureData')
+const validator = require('validator')
 
 // Get all pigs
 router.get('/', async (req, res) => {
@@ -84,12 +85,17 @@ router.get('/:id/posture', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const pigId = parseInt(req.params.id)
-    const updates = {
-      breed: req.body.breed,
-      age: parseInt(req.body.age),
-      groupId: parseInt(req.body.group),
-      lastUpdate: new Date()
+    const updates = {}
+    if (req.body.breed && validator.isAlpha(req.body.breed)) {
+      updates.breed = req.body.breed
     }
+    if (req.body.age && validator.isInt(req.body.age)) {
+      updates.age = parseInt(req.body.age)
+    }
+    if (req.body.group && validator.isInt(req.body.group)) {
+      updates.groupId = parseInt(req.body.group)
+    }
+    updates.lastUpdate = new Date()
     
     const updatedPig = await Pig.findOneAndUpdate(
       { pigId },
