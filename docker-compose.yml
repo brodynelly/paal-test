@@ -3,13 +3,22 @@ services:
   mongo:
     image: mongo:latest # Change 'server:1.0.1' to official mongo image
     container_name: ${DATABASE_HOST}
+    restart: always
+    env_file: .env
+    environment:
+      #this will allow for direct connection to database vars via ENV file constraints
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DATABASE_COLLECTION}
     ports:
       - ${DATABASE_PORT}:${DATABASE_PORT}
     networks:
       - app-net
     volumes:
       - database-v:/data/db
-    command: [ "mongod", "--replSet", "rs0" ]
+      - ./database/sslkey/security.keyFile:/etc/secrets/security.keyFile:rw
+      - ./database/init-user.js:/docker-entrypoint-initdb.d/init-user.js:ro
+    command: [ "mongod", "--replSet", "rs0", "--auth", "--keyFile", "/etc/secrets/security.keyFile" ]
 
   backend:
     image: server:1.0.0
@@ -31,7 +40,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend
+      dockerfile: Dockerfile.dev
     container_name: frontend
     depends_on:
       - backend
@@ -39,8 +48,9 @@ services:
       - app-net
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=production
+    env_file: .env
+    volumes:
+      - ./:/usr/src/app
 
 networks:
   app-net:

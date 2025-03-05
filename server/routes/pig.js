@@ -9,12 +9,14 @@ const PostureData = require('../models/PostureData')
 router.get('/', async (req, res) => {
   try {
     const pigs = await Pig.find({}).sort({ lastUpdate: -1 })
+    const selectedPig = pigs.find((pig) => pig._id === formData.pigId)
+    const stallId = selectedPig ? selectedPig.stall : null
     
     const transformedPigs = pigs.map(pig => ({
       owner: `PIG-${pig.pigId.toString().padStart(3, '0')}`,
       status: pig.bcsScore >= 4 ? "critical" : pig.bcsScore >= 3 ? "healthy" : "suspicious",
       costs: pig.age,
-      region: `Group ${pig.groupId}`,
+      region: `Group ${stallId}`,
       stability: Math.floor(Math.random() * 100),
       lastEdited: pig.lastUpdate
         ? new Date(pig.lastUpdate).toLocaleDateString('en-GB', {
@@ -86,6 +88,39 @@ router.get('/:id/bcs', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch BCS data' })
   }
 })
+
+
+// POST /api/pigs - Create a new pig.
+router.post('/', async (req, res) => {
+  try {
+    const { pigId, tag, breed, age, currentLocation } = req.body;
+    
+    // Check if a pig with the given pigId already exists.
+    const existingPig = await Pig.findOne({ pigId });
+    if (existingPig) {
+      return res.status(400).json({ error: 'Pig with this pigId already exists.' });
+    }
+
+    // Create a new pig document.
+    const newPig = await Pig.create({
+      pigId: Number(pigId),
+      tag,
+      breed,
+      age: Number(age),
+      currentLocation: { stallId: stall._id, barnId: stall.barnId, farmId: stall.farmId }, // should include farmId, barnId, stallId
+      lastUpdate: new Date(),
+      active: true,
+    });
+
+    pigs.push(pig);
+    
+    res.status(201).json(newPig);
+  } catch (error) {
+    console.error("Error creating pig:", error);
+    res.status(500).json({ error: "Failed to create pig" });
+  }
+});
+
 
 // Get pig posture history
 router.get('/:id/posture', async (req, res) => {
