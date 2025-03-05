@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 
 # Install all dependencies including dev dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 # Copy all source code (with volume override in development, this step might be skipped)
 COPY . .
