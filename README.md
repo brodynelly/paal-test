@@ -72,8 +72,8 @@ Create a `.env` file in the root directory with the following content (adjust as
     MONGODB_URI=mongodb://PAAL:PAAL@mongo:27017/paalab?replicaSet=rs0&authSource=admin
     
     # Clerk Environment Variables (if applicable)
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_Z3VpZGVkLW9jdG9wdXMtMjEuY2xlcmsuYWNjb3VudHMuZGV2JA
-    CLERK_SECRET_KEY=sk_test_jtL2mcRdMX0pfDedog8R96GuhWRtikw4D3pxm9wGE6
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_publishable_key_here
+    CLERK_SECRET_KEY=your_secret_key_here
     
     # Clerk URLs
     NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
