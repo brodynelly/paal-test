@@ -2,9 +2,9 @@
 PAAL Research Web Page
 ======================
 
-Hello team,
+Hey,
 
-Below you'll find the technical overview, setup instructions, and workflow guidelines for the PAAL Research Web Page project. This guide covers our full setup—including Docker, MongoDB replica set configuration, environment variable management, and our development workflow. With these instructions, you should be able to clone the repository from the `localDev` branch and run everything seamlessly.
+This is the documentation for the local developemnt for the PAAL Web Page project. This is a short !read-me with general set-up instructions and workflow  guide for other developers to understand the project on a higher-level. This guide covers full setup—instructions, that anyone with little development knowledge can understand (hopefully). You will learn how to set up Docker, MongoDB running on replica sets, environment variable management, and our development workflow. With these instructions, you should be able to clone the repository from the `localDev` branch and run everything seamlessly.
 
 Tech Stack
 ----------
@@ -39,22 +39,22 @@ Getting Started
 
 ### 1\. Clone the Repository
 
-    git clone https://github.com/brodynelly/paal-test.git
+    git clone --branch localDev --single-branch https://github.com/brodynelly/paal-test.git
     cd paal-test
 
-### 2\. Create and Switch to Your `localDev` Branch
+### 2\. Create and Switch to Your Specified `localDev` Branch
 
-    git checkout -b localDev
+    git checkout -b <user_name>localDev
 
-This command creates a new branch named `localDev` and switches you to it. All changes you make now will be isolated from the main branch.
+This command creates a new branch named `localDev` and switches you to it. Remember to replace `<user_name>` with your own git username. All changes you make now will be isolated from the main branch.
 
 ### 3\. Set Up Environment Variables
 
 Create a `.env` file in the root directory with the following content (adjust as needed):
 
     # MongoDB Initialization Variables
-    MONGO_INITDB_ROOT_USERNAME=PAAL
-    MONGO_INITDB_ROOT_PASSWORD=PAAL
+    MONGO_INITDB_ROOT_USERNAME=<username> 
+    MONGO_INITDB_ROOT_PASSWORD=<password> 
     MONGO_INITDB_DATABASE=paalab
     
     # MongoDB Connection Settings
@@ -65,15 +65,11 @@ Create a `.env` file in the root directory with the following content (adjust as
     # Backend & Server Variables
     SERVER_HOST=server-c
     SERVER_PORT=5005
-    PORT=5005
-    
-    # MongoDB Connection URI
-    # MongoDB Connection URI
-    MONGODB_URI=mongodb://PAAL:PAAL@mongo:27017/paalab?replicaSet=rs0&authSource=admin
+    PORT=3000
     
     # Clerk Environment Variables (if applicable)
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_publishable_key_here
-    CLERK_SECRET_KEY=your_secret_key_here
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_publishable_key_here (reach out to me if need) 
+    CLERK_SECRET_KEY=your_secret_key_here (reach out to me if need) 
     
     # Clerk URLs
     NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
@@ -82,7 +78,7 @@ Create a `.env` file in the root directory with the following content (adjust as
     NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/overview
     
     # API URL for React App
-    REACT_APP_API_URL=http://backend:5005
+    REACT_APP_API_URL=http://server-c:5005
 
 Docker Compose automatically loads a file named `.env` from the root directory when you run `docker compose up`.
 
@@ -117,11 +113,13 @@ Snippet from `docker-compose.yml`:
         command: [ "mongod", "--replSet", "rs0", "--auth", "--keyFile", "/etc/secrets/security.keyFile" ]
     
 
-After starting the container, connect to MongoDB and run the replica set initiation command (see below).
+After starting the container, connect to MongoDB and run the replica set initiation command (see RUNNING THE APPLICATION SECTION).
 
 ### 5\. Frontend and Backend Services
 
-The backend service runs your Node.js/Express server, while the frontend uses Next.js. For development, we set up code mounts and use the Next.js development command to enable live reloading.
+The backend service runs the Node.js/Express server, the frontend service runs Next.js, and the Mongo service hosts the database. Each container operates in an isolated network environment. If you were to check your router, each Docker container would register as its own device. These containers communicate through a Docker network bridge, which provides a secure link between them. This setup is particularly useful in production, as it helps restrict communication gateways, reducing exposure to external threats and minimizing potential internal bugs.
+
+Now, let's examine what makes our Docker environment function. Everything is defined as services within our docker-compose.yml file. Each service is started based on its Dockerfile, which provides specific instructions for launching the server. And each service is operated with our 'DockerFile' identifier for specific instructions to start our server. There are two sets of DockerFiles in the main directory of the project. one is for production and has the suffix `.production`, and the other is for development with the suffix `.development`. For now, we will focus on the development build, which uses the Next.js development command that enables live reloading!!
 
 **Example Docker Compose entry for Frontend (development override):**
 
@@ -151,7 +149,7 @@ Running the Application
 
 ### 2\. Initiate the MongoDB Replica Set
 
-Once MongoDB is running, connect to it with authentication from the admin database:
+Once MongoDB is running, connect to it with authentication from the admin database (this is a seperate database from PAAL that sets the user Auth) :
 
     mongosh "mongodb://PAAL:PAAL@mongo:27017/admin?authSource=admin"
 
@@ -160,7 +158,7 @@ Then, initiate the replica set:
     rs.initiate({
       _id: "rs0",
       members: [
-        { _id: 0, host: "mongo:27017" }
+        { _id: 0, host: "mongo-c:27017" }
       ]
     })
 
@@ -170,9 +168,12 @@ Verify the configuration:
 
 ### 3\. Seed the Database (Optional)
 
-If you have an initial seed script to populate your database, run:
+Now, when you first load the DB there will be no data. Lets populate it with some prop data, run:
 
+    docker exec -it server-c /bin/bash
     npm run seed
+
+*We first load into the Docker CLI to execute our seed command, because the connection to the database is over the docker-network*
 
 ### 4\. Start the Development Servers
 
@@ -210,6 +211,9 @@ We include an automated script (`backup_to_github.sh`) that runs `mongodump` ins
 *   Pull the latest commit from the `localDev` branch.
 *   If necessary, run `mongorestore` (or a provided script) to restore the database from the backup.
 
+*    TODO:
+*        I will bind the docker `mongodb` image to a volume with backup data stored in this github repo for percistant data flow. 
+
 Project Structure
 -----------------
 
@@ -232,7 +236,7 @@ Project Structure
 How It All Works
 ----------------
 
-*   **Docker & Environment Variables:** Docker Compose automatically loads your `.env` file to replace placeholders in the configuration. This ensures consistency across environments and makes it easy to adjust credentials, ports, and other settings.
+*   **Docker & Environment Variables:** Docker Compose automatically loads your `.env` file to replace placeholders in the configuration. This ensures consistency across environments and levels of production. Simply by changing our env variables, we can have a production build in less than a week. This also makes it easy to adjust credentials, ports, and other settings.
 *   **MongoDB Replica Set:** MongoDB is configured to run as a replica set even if it's a single node. A key file is mounted for secure inter-node authentication, and the container automatically creates a root user based on your `.env` variables. After container startup, you manually initiate the replica set using `rs.initiate()`.
 *   **Development Workflow:** The frontend service is set up for development with live reloading by mounting your source code directory. The backend service connects to MongoDB using a connection string that includes the replica set and authentication parameters.
 *   **Backup and Restore:** The backup script leverages MongoDB’s `mongodump` and `mongorestore` commands to maintain a consistent dataset across local machines, ensuring every developer works with the same data.
