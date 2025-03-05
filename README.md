@@ -68,7 +68,7 @@ Create a `.env` file in the root directory with the following content (adjust as
     PORT=5005
     
     # MongoDB Connection URI
-    # Note: This URI uses the 'test' database initially; update it to 'paalab' if needed
+    # MongoDB Connection URI
     MONGODB_URI=mongodb://PAAL:PAAL@mongo:27017/paalab?replicaSet=rs0&authSource=admin
     
     # Clerk Environment Variables (if applicable)
