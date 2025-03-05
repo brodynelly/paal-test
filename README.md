@@ -284,18 +284,4 @@ How It All Works
 *   **MongoDB Replica Set:** MongoDB is configured to run as a replica set even if it's a single node. A key file is mounted for secure inter-node authentication, and the container automatically creates a root user based on your `.env` variables. After container startup, you manually initiate the replica set using `rs.initiate()`.
 *   **Development Workflow:** The frontend service is set up for development with live reloading by mounting your source code directory. The backend service connects to MongoDB using a connection string that includes the replica set and authentication parameters.
 *   **Backup and Restore:** The backup script leverages MongoDB’s `mongodump` and `mongorestore` commands to maintain a consistent dataset across local machines, ensuring every developer works with the same data.
-*   **Version Control:** Always commit your changes to your local development branch (`localDev`) and avoid pushing directly to `main` or the default branch.
-
-Final Notes
------------
-
-With this setup, you should be able to:
-
-*   Clone the repository.
-*   Create and switch to your `localDev` branch.
-*   Configure your environment using `.env`.
-*   Launch MongoDB with a secure replica set configuration via Docker Compose.
-*   Run both frontend and backend development servers with live reloading.
-*   Use our backup script to maintain consistent database snapshots.
-
-Happy coding!
+*   **Version Control:** Always commit your changes to your local development branch (`localDev`) and avoid pushing directly to `main` or the default 
