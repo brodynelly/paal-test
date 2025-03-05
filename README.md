@@ -115,13 +115,11 @@ Snippet from `docker-compose.yml`:
 
 After starting the container, connect to MongoDB and run the replica set initiation command (see RUNNING THE APPLICATION SECTION).
 
-5.1 \. Creating the Authentication SSL Key for `security.keyFile`
-==============================================================
+### 5.1 \. Creating the Authentication SSL Key for `security.keyFile`
 
 To enable **internal authentication** for MongoDB using a **key file**, follow these steps:
 
-Step 1: Create the Directory for the Key File
----------------------------------------------
+#### Step 1: Create the Directory for the Key File
 
 Ensure that the directory structure exists on your host machine:
 
@@ -129,8 +127,7 @@ Ensure that the directory structure exists on your host machine:
 
 This will create the `sslkey` directory inside `database/`.
 
-Step 2: Generate the Key File
------------------------------
+#### Step 2: Generate the Key File
 
 Run the following command to create a **random key** and save it to `security.keyFile`:
 
@@ -138,8 +135,8 @@ Run the following command to create a **random key** and save it to `security.ke
 
 This generates a **756-byte** base64-encoded key (recommended by MongoDB) and saves it to `security.keyFile`.
 
-Step 3: Set Proper Permissions
-------------------------------
+#### Step 3: Set Proper Permissions
+
 
 MongoDB requires that the key file is **only readable** by the owner (`600` permissions):
 
@@ -147,8 +144,7 @@ MongoDB requires that the key file is **only readable** by the owner (`600` perm
 
 This ensures that only the owner can read and write the key file.
 
-Step 4: Verify the Key File
----------------------------
+##### Step 4: Verify the Key File
 
 You can check the contents of the key file to confirm it was generated correctly:
 
@@ -156,8 +152,7 @@ You can check the contents of the key file to confirm it was generated correctly
 
 You should see a long base64-encoded string.
 
-Step 5: Start MongoDB with Authentication
------------------------------------------
+#### Step 5: Start MongoDB with Authentication
 
 Since your `docker-compose.yml` is already mounting the key file to `/etc/secrets/security.keyFile`, simply start your MongoDB container:
 
