@@ -103,6 +103,7 @@ async function seedDatabase() {
           name: `Barn ${j}`,
           farmId: farm._id
         });
+        // put farm into array of farms
         barns.push(barn);
       }
     }

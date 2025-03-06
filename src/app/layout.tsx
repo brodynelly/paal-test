@@ -1,17 +1,18 @@
 import type { Metadata } from "next"
 import { ThemeProvider } from "next-themes"
-import { Inter } from "next/font/google"
+// import { Inter } from "next/font/google"
+import { GeistSans } from "geist/font/sans"
 import "./globals.css"
 import { siteConfig } from "./siteConfig"
 import { ClerkProvider } from "@clerk/nextjs"
 
 import { Sidebar } from "@/components/ui/navigation/Sidebar"
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-})
+// const inter = Inter({
+//   subsets: ["latin"],
+//   display: "swap",
+//   variable: "--font-inter",
+// })
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://yoururl.com"),
@@ -47,7 +48,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${inter.className} overflow-y-scroll scroll-auto antialiased selection:bg-indigo-100 selection:text-indigo-700 dark:bg-gray-950`}
+          className={`${GeistSans.className}  overflow-y-scroll scroll-auto antialiased selection:bg-indigo-100 selection:text-indigo-700 dark:bg-gray-950`}
           suppressHydrationWarning
         >
           <div className="mx-auto max-w-screen-2xl">

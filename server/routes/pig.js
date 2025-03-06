@@ -9,14 +9,12 @@ const PostureData = require('../models/PostureData')
 router.get('/', async (req, res) => {
   try {
     const pigs = await Pig.find({}).sort({ lastUpdate: -1 })
-    const selectedPig = pigs.find((pig) => pig._id === formData.pigId)
-    const stallId = selectedPig ? selectedPig.stall : null
     
     const transformedPigs = pigs.map(pig => ({
       owner: `PIG-${pig.pigId.toString().padStart(3, '0')}`,
       status: pig.bcsScore >= 4 ? "critical" : pig.bcsScore >= 3 ? "healthy" : "suspicious",
       costs: pig.age,
-      region: `Group ${stallId}`,
+      region: `Group ${pig.currentLocation.stallId}`,
       stability: Math.floor(Math.random() * 100),
       lastEdited: pig.lastUpdate
         ? new Date(pig.lastUpdate).toLocaleDateString('en-GB', {
@@ -43,19 +41,23 @@ router.get('/', async (req, res) => {
   }
 })
 
-// Get single pig
 router.get('/:id', async (req, res) => {
   try {
-    const pig = await Pig.findOne({ pigId: parseInt(req.params.id) })
-    if (!pig) {
-      return res.status(404).json({ error: 'Pig not found' })
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid pig id' });
     }
-    res.json(pig)
+    const pig = await Pig.findOne({ pigId: id });
+    if (!pig) {
+      return res.status(404).json({ error: 'Pig not found' });
+    }
+    res.json(pig);
   } catch (error) {
-    console.error('Error fetching pig:', error)
-    res.status(500).json({ error: 'Failed to fetch pig' })
+    console.error('Error fetching pig:', error);
+    res.status(500).json({ error: 'Failed to fetch pig' });
   }
-})
+});
+
 
 // Get pig BCS history
 router.get('/:id/bcs', async (req, res) => {
@@ -89,8 +91,7 @@ router.get('/:id/bcs', async (req, res) => {
   }
 })
 
-
-// POST /api/pigs - Create a new pig.
+// creating a new pig 
 router.post('/', async (req, res) => {
   try {
     const { pigId, tag, breed, age, currentLocation } = req.body;
@@ -101,18 +102,23 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Pig with this pigId already exists.' });
     }
 
-    // Create a new pig document.
+    // Create a new pig document using currentLocation directly.
     const newPig = await Pig.create({
       pigId: Number(pigId),
       tag,
       breed,
       age: Number(age),
-      currentLocation: { stallId: stall._id, barnId: stall.barnId, farmId: stall.farmId }, // should include farmId, barnId, stallId
+      currentLocation: { 
+        stallId: currentLocation.stallId, 
+        barnId: currentLocation.barnId, 
+        farmId: currentLocation.farmId 
+      },
       lastUpdate: new Date(),
       active: true,
     });
 
-    pigs.push(pig);
+    // Make sure you push the newPig, not an undefined variable.
+    // Pig.push(newPig);
     
     res.status(201).json(newPig);
   } catch (error) {
@@ -180,30 +186,41 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to update pig' })
   }
 })
-
-// Delete pigs
 router.delete('/', async (req, res) => {
   try {
-    const { pigIds } = req.body
-    const result = await Pig.deleteMany({ 
-      pigId: { $in: pigIds.map(id => parseInt(id)) } 
-    })
+    const { pigIds } = req.body;
+    // Convert string IDs to numbers if necessary
+    const numericPigIds = pigIds.map(id => parseInt(id)).filter(id => !isNaN(id));
     
-    // Also delete related data
+    // Find all Pig documents that match the numeric pigIds
+    const pigs = await Pig.find({ pigId: { $in: numericPigIds } });
+    
+    if (!pigs.length) {
+      return res.status(404).json({ error: 'No pigs found with the given IDs' });
+    }
+    
+    // Collect the ObjectIds from the found pigs
+    const pigObjectIds = pigs.map(pig => pig._id);
+    
+    // Delete pigs based on their numeric pigId
+    const result = await Pig.deleteMany({ pigId: { $in: numericPigIds } });
+    
+    // Use pigObjectIds for related collections
     await Promise.all([
-      BCSData.deleteMany({ pigId: { $in: pigIds } }),
-      PostureData.deleteMany({ pigId: { $in: pigIds } })
-    ])
+      BCSData.deleteMany({ pigId: { $in: pigObjectIds } }),
+      PostureData.deleteMany({ pigId: { $in: pigObjectIds } })
+    ]);
 
     res.json({ 
       message: 'Pigs deleted successfully',
       deletedCount: result.deletedCount 
-    })
+    });
   } catch (error) {
-    console.error('Error deleting pigs:', error)
-    res.status(500).json({ error: 'Failed to delete pigs' })
+    console.error('Error deleting pigs:', error);
+    res.status(500).json({ error: 'Failed to delete pigs' });
   }
-})
+});
+
 
 // ADDITIONAL: Pig analytics
 router.get('/analytics/summary', async (req, res) => {

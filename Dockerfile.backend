@@ -17,4 +17,4 @@ COPY server ./server
 EXPOSE 5005
 
 # Start the back end using your start script
-CMD ["node", "./server/index.js"]
+CMD ["npm", "run", "dev:backend"]

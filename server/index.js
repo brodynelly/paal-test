@@ -46,7 +46,7 @@ const DATABASE_DB = process.env.MONGO_INITDB_DATABASE
 const DATABASE_USERNAME = process.env.MONGO_INITDB_ROOT_USERNAME
 const DATABASE_PASSWORD = process.env.MONGO_INITDB_ROOT_PASSWORD
 
-const URI = `mongodb://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}?replicaSet=rs0&authSource=admin`;
+const URI = `mongodb://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@mongo:${DATABASE_PORT}/${DATABASE_DB}?replicaSet=rs0&authSource=admin`;
 
 mongoose.connect(URI)
   .then(() => {
@@ -159,8 +159,6 @@ const emitUpdatedStats = async () => {
     }))
 
     // Transform pigs for UI
-    const selectedPig = pigs.find((pig) => pig._id === formData.pigId)
-    const stallId = selectedPig ? selectedPig.stall : null
 
 
     
@@ -169,7 +167,7 @@ const emitUpdatedStats = async () => {
       owner: `PIG-${pig.pigId.toString().padStart(3, '0')}`,
       status: pig.bcsScore >= 4 ? "critical" : pig.bcsScore >= 3 ? "healthy" : "suspicious",
       costs: pig.age,
-      region: stallId, 
+      region: pig.currentLocation.stallId, 
       stability: pig.stability, // random example
       lastEdited: pig.lastUpdate
         ? new Date(pig.lastUpdate).toLocaleDateString('en-GB', {

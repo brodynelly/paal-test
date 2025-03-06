@@ -18,29 +18,32 @@ interface PigIdInputProps {
   onChange: (value: string) => void
   onError: (error: string | null) => void
 }
-
 export function PigIdInput({ value, onChange, onError }: PigIdInputProps) {
-  const [isChecking, setIsChecking] = useState(false)
+  const [isChecking, setIsChecking] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   const checkPigIdExists = async (id: string) => {
-    setIsChecking(true)
+    setIsChecking(true);
     try {
       // GET endpoint: Assumes your GET route is /api/pigs/:id and returns 404 if not found.
-      await axios.get(`http://localhost:5005/api/pigs/${id}`)
+      await axios.get(`http://localhost:5005/api/pigs/${id}`);
       // If we get here, the pig exists
-      onError("This Pig ID already exists.")
+      setHasError(true);
+      onError("This Pig ID already exists.");
     } catch (error: any) {
       if (error.response && error.response.status === 404) {
         // Pig not found: valid pigId
-        onError(null)
+        setHasError(false);
+        onError(null);
       } else {
         // Other errors
-        onError("Error checking Pig ID")
+        setHasError(false);
+        onError("Error checking Pig ID");
       }
     } finally {
-      setIsChecking(false)
+      setIsChecking(false);
     }
-  }
+  };
 
   return (
     <div>
@@ -50,11 +53,12 @@ export function PigIdInput({ value, onChange, onError }: PigIdInputProps) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={() => {
-          if (value) checkPigIdExists(value)
+          if (value) checkPigIdExists(value);
         }}
         placeholder="Enter a unique Pig ID"
+        hasError={hasError}
       />
       {isChecking && <p className="text-sm text-gray-500">Checking...</p>}
     </div>
-  )
+  );
 }

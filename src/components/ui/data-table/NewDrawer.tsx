@@ -1,6 +1,4 @@
 "use client"
-import React, { useEffect, useState } from "react"
-import axios from "axios"
 import { Button } from "@/components/Button"
 import {
   Drawer,
@@ -11,6 +9,8 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/Drawer"
+import { Input } from "@/components/Input"
+import { Label } from "@/components/Label"
 import { RadioCardGroup, RadioCardItem } from "@/components/RadioCardGroup"
 import {
   Select,
@@ -19,9 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/Select"
-import { Input } from "@/components/Input"
-import { Label } from "@/components/Label"
-import { PigIdInput } from "./CheckPig" // Assume this handles checking for duplicate Pig IDs
+import axios from "axios"
+import React, { useEffect, useState } from "react"
+import { PigIdInput } from "./CheckPig"; // Assume this handles checking for duplicate Pig IDs
 
 // -------------------------
 // Types for API data
@@ -98,6 +98,9 @@ const FirstPage = ({ formData, onUpdateForm, farms, barns, stalls }: FirstPagePr
     : []
   // Get the selected barn (to display its name in stall descriptions).
   const selectedBarn = availableBarns.find((barn) => barn._id === formData.barn)
+
+  // When pigId changes, update the formData to also include the tag.
+
 
   return (
     <>
@@ -185,61 +188,73 @@ const FirstPage = ({ formData, onUpdateForm, farms, barns, stalls }: FirstPagePr
 // -------------------------
 // Second Page: Additional Pig Data Editing
 // Now includes fields for Pig ID, Tag, Breed and Age.
-
 interface SecondPageProps {
-  formData: PigFormData
-  onUpdateForm: (updates: Partial<PigFormData>) => void
+  formData: PigFormData;
+  onUpdateForm: (updates: Partial<PigFormData>) => void;
 }
 
-const SecondPage = ({ formData, onUpdateForm }: SecondPageProps) => (
-  <>
-    <DrawerHeader>
-      <DrawerTitle>
-        <p>Edit Pig Details</p>
-        <span className="text-sm font-normal text-gray-500 dark:text-gray-500">
-          Pig ID, Tag, Breed & Age
-        </span>
-      </DrawerTitle>
-    </DrawerHeader>
-    <DrawerBody className="-mx-6 space-y-6 overflow-y-scroll border-t border-gray-200 px-6 dark:border-gray-800">
-      <FormField label="Pig ID">
-        <PigIdInput
-          value={formData.pigId || ""}
-          onChange={(value) => onUpdateForm({ pigId: value })}
-          onError={(error) => {
-            /* Handle error message state if needed */
-          }}
-        />
-      </FormField>
-      <FormField label="Tag">
-        <Input
-          name="tag"
-          value={formData.tag || ""}
-          onChange={(e) => onUpdateForm({ tag: e.target.value })}
-          placeholder="Enter pig tag"
-        />
-      </FormField>
-      <FormField label="Breed">
-        <Input
-          name="breed"
-          value={formData.breed}
-          onChange={(e) => onUpdateForm({ breed: e.target.value })}
-          placeholder="Enter breed"
-        />
-      </FormField>
-      <FormField label="Age (months)">
-        <Input
-          name="age"
-          type="number"
-          value={formData.age}
-          onChange={(e) => onUpdateForm({ age: e.target.value })}
-          placeholder="Enter age"
-          min="0"
-        />
-      </FormField>
-    </DrawerBody>
-  </>
-)
+const SecondPage = ({ formData, onUpdateForm }: SecondPageProps) => {
+  const handlePigIdChange = (value: string) => {
+    // Update both pigId and tag in the form state.
+    onUpdateForm({ pigId: value });
+    onUpdateForm({ tag: value ? `PIG-${value}` : "" }); 
+  };
+
+  return (
+    <>
+      <DrawerHeader>
+        <DrawerTitle>
+          <p>Edit Pig Details</p>
+          <span className="text-sm font-normal text-gray-500 dark:text-gray-500">
+            Pig ID, Tag, Breed & Age
+          </span>
+        </DrawerTitle>
+      </DrawerHeader>
+      <DrawerBody className="-mx-6 space-y-6 overflow-y-scroll border-t border-gray-200 px-6 dark:border-gray-800">
+        <FormField label="">
+          <PigIdInput
+            value={formData.pigId || ""}
+            onChange={(value) => handlePigIdChange(value)}
+            onError={(error) => {
+              /* Handle error message state if needed */
+            }}
+          />
+        </FormField>
+        <FormField label="Tag">
+          <Input
+            disabled
+            name="tagDisplay"
+            value={formData.pigId ? `PIG-${formData.pigId}` : ""}
+            placeholder="Enter pig id"
+          />
+          <input
+            type="hidden"
+            name="tag"
+            value={formData.pigId ? `PIG-${formData.pigId}` : ""}
+          />
+        </FormField>
+        <FormField label="Breed">
+          <Input
+            name="breed"
+            value={formData.breed}
+            onChange={(e) => onUpdateForm({ breed: e.target.value })}
+            placeholder="Enter breed"
+          />
+        </FormField>
+        <FormField label="Age (months)">
+          <Input
+            name="age"
+            type="number"
+            value={formData.age}
+            onChange={(e) => onUpdateForm({ age: e.target.value })}
+            placeholder="Enter age"
+            min="0"
+          />
+        </FormField>
+      </DrawerBody>
+    </>
+  );
+};
 
 // -------------------------
 // Summary Page: Review Pig Data
@@ -460,3 +475,4 @@ export function PigDrawer({ open, onOpenChange }: PigDrawerProps) {
     </Drawer>
   )
 }
+

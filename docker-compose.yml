@@ -8,7 +8,7 @@ services:
     environment:
       #this will allow for direct connection to database vars via ENV file constraints
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${DATABASE_COLLECTION}
     ports:
       - ${DATABASE_PORT}:${DATABASE_PORT}
@@ -34,8 +34,10 @@ services:
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}
     volumes:
-      - ./server:/server
-      - server-v-node-modules:/server/node_modules
+      - ./:/usr/server
+      #  for production when ready 
+      # - ./server:/server 
+      # - server-v-node-modules:/server/node_modules
 
   frontend:
     build:
