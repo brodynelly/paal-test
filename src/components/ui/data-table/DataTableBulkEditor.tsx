@@ -74,7 +74,6 @@ function DataTableBulkEditor<TData>({
       await api.delete(`http://localhost:5005/api/pigs`, {
         data: { pigIds: selectedPigs }
       })
-      window.location.reload() // Refresh to show updated data
     } catch (error) {
       console.error('Error deleting pigs:', error)
       // Here you would show an error notification

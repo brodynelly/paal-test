@@ -38,50 +38,58 @@ export const hasErrorInput = [
   "ring-red-200 dark:ring-red-700/30",
 ]
 
-// Number formatter function
-export const usNumberformatter = (number: number, decimals = 0) => {
+// ✅ Improved Number Formatter with Safety Checks
+export const usNumberFormatter = (number: number | null | undefined, decimals = 0) => {
+  if (typeof number !== "number" || isNaN(number)) return "0"
+
   const fixedNumber = Number(number.toFixed(decimals))
-  return Intl.NumberFormat("us", {
+  return Intl.NumberFormat("en-US", {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  })
-    .format(fixedNumber)
-    .toString()
+  }).format(fixedNumber)
 }
 
-export const percentageFormatter = (number: number, decimals = 1) => {
-  // Convert to fixed precision number first
+export const percentageFormatter = (number: number | null | undefined, decimals = 1) => {
+  if (typeof number !== "number" || isNaN(number)) return "0%"
+
   const fixedNumber = Number(number.toFixed(4))
   const formattedNumber = new Intl.NumberFormat("en-US", {
     style: "percent",
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   }).format(fixedNumber)
-  const symbol = fixedNumber > 0 ? "+" : ""
 
+  const symbol = fixedNumber > 0 ? "+" : ""
   return `${symbol}${formattedNumber}`
 }
 
-export const millionFormatter = (number: number, decimals = 1) => {
+export const millionFormatter = (number: number | null | undefined, decimals = 1) => {
+  if (typeof number !== "number" || isNaN(number)) return "0M"
+
   const fixedNumber = Number(number.toFixed(decimals))
   const formattedNumber = new Intl.NumberFormat("en-US", {
     style: "decimal",
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   }).format(fixedNumber)
+
   return `${formattedNumber}M`
 }
 
 export const formatters: { [key: string]: any } = {
-  currency: (number: number, currency: string = "USD") => {
+  currency: (number: number | null | undefined, currency: string = "USD") => {
+    if (typeof number !== "number" || isNaN(number)) return "$0.00"
+
     const fixedNumber = Number(number.toFixed(4))
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: currency,
     }).format(fixedNumber)
   },
-  unit: (number: number) => {
+  unit: (number: number | null | undefined) => {
+    if (typeof number !== "number" || isNaN(number)) return "0"
+    
     const fixedNumber = Number(number.toFixed(4))
-    return `${usNumberformatter(fixedNumber)}`
+    return usNumberFormatter(fixedNumber)
   },
 }

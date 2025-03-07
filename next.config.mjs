@@ -1,16 +1,12 @@
 /** @type {import('next').NextConfig} */
-
 const nextConfig = {
-  redirects: async () => {
-    return [
-      {
-        source: "/",
-        destination: "/overview",
-        permanent: true,
-        
-      },
-    ];
-  },
+  redirects: async () => [
+    {
+      source: "/",
+      destination: "/overview",
+      permanent: true,
+    },
+  ],
   images: {
     remotePatterns: [
       {
@@ -20,7 +16,7 @@ const nextConfig = {
         pathname: "/**",
       },
     ],
-  }
+  },
 };
 
 export default nextConfig;

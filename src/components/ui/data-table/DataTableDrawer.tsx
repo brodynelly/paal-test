@@ -1,34 +1,38 @@
 "use client"
+
 import { Button } from "@/components/Button"
 import {
-    Drawer,
-    DrawerClose,
-    DrawerContent,
-    DrawerFooter
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
 } from "@/components/Drawer"
 import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
 import {
-    Select,
-    SelectContent,
-    SelectItemExtended,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItemExtended,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/Select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/Tabs"
 import axios from "axios"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useDropzone } from "react-dropzone"
-import { PigIdInput } from "./CheckPig"; // used to check duplicate Pig IDs
+import { PigIdInput } from "./CheckPig"
 
 // -------------------------
-// Types for API data
+// Types
+// -------------------------
 
 type Farm = {
   _id: string
   name: string
   location?: string
-  barns: [] // Farms come with an empty barns array.
+  barns: []
 }
 
 type Barn = {
@@ -45,21 +49,51 @@ type Stall = {
   farmId: string
 }
 
-// -------------------------
-// Pig Form Data type matching your Pig model
-// Note: the user-defined pig identifier is stored in pigId.
+// The final shape your form expects:
 export type PigFormData = {
-  pigId: string       // user-defined pigId (this is the displayed/edited id)
-  tag: string         // pig tag
-  farm: string        // farm _id (non-changeable in edit)
-  barn: string        // barn _id (non-changeable in edit)
-  stall: string       // stall _id (changeable)
+  pigId: string        // numeric portion from "PIG-XXX"
+  tag: string          // the entire owner string e.g. "PIG-085"
+  farm: string         // farm _id (fetched from pig location)
+  barn: string         // barn _id (fetched from pig location)
+  stall: string        // stall _id (fetched from pig location)
   breed: string
-  age: string         // will be converted to Number on submit
+  age: string
+  currentLocation: {
+    farmId: string;
+    barnId: string;
+    stallId: string;
+  };
+}
+
+// Example of your server shape, e.g.:
+// {
+//   owner: "PIG-085",
+//   status: "suspicious",
+//   costs: 24,
+//   region: "67c73ae8933c6281901e9a4f",
+//   breed: "Berkshire",
+//   ...
+// }
+type ServerPigData = {
+  owner: string
+  breed?: string
+  costs?: number
+  [key: string]: any // everything else
 }
 
 // -------------------------
-// File types for feed uploads.
+// Helper: parse numeric pigId from "PIG-085" => "085"
+// If owner is "PIG-123", returns "123"
+// -------------------------
+function getNumericId(owner: string | undefined): string {
+  if (!owner) return ""
+  // If it's "PIG-085", remove "PIG-" to get "085"
+  return owner.replace(/^PIG-/i, "").trim()
+}
+
+// -------------------------
+// File types for feed uploads
+// -------------------------
 const fileTypes = [
   "Posture Data",
   "BCS Data",
@@ -70,8 +104,8 @@ const fileTypes = [
 ]
 
 // -------------------------
-// Form field component
-
+// Shared FormField
+// -------------------------
 const FormField = ({
   label,
   children,
@@ -86,8 +120,8 @@ const FormField = ({
 )
 
 // -------------------------
-// Details Form Component
-// All fields are controlled so the current pig data is pre-filled using pigId (not _id).
+// Details Form
+// -------------------------
 interface DetailsFormProps {
   formData: PigFormData
   onUpdateForm: (updates: Partial<PigFormData>) => void
@@ -97,71 +131,64 @@ interface DetailsFormProps {
 }
 
 const DetailsForm = ({ formData, onUpdateForm, farms, barns, stalls }: DetailsFormProps) => {
-  // Find current farm and barn.
-  const currentFarm = farms.find((farm) => farm._id === formData.farm)
-  const currentBarn = barns.find((barn) => barn._id === formData.barn)
-  // Filter stalls based on current barn.
-  const availableStalls = currentBarn
-    ? stalls.filter((stall) => stall.barnId === currentBarn._id)
-    : []
+  // Find the currently selected farm / barn objects:
+  const currentFarm = formData.currentLocation.farmId;
+  const currentBarn = formData.currentLocation.barnId;
+
+  // Only show stalls for the chosen barn
+  const currentStall = formData.currentLocation.stallId;
 
   return (
     <div className="space-y-6">
-      {/* Display fixed farm */}
       <FormField label="Farm">
         <Input
-          value={currentFarm?.name || ""}
+          value={currentFarm || ""}
           disabled
           placeholder="Farm not set"
         />
       </FormField>
-      {/* Display fixed barn */}
       <FormField label="Barn">
         <Input
-          value={currentBarn?.name || ""}
+          value={currentBarn || ""}
           disabled
           placeholder="Barn not set"
         />
       </FormField>
-      {/* Allow changing stall */}
       <FormField label="Stall">
-        <Select
-          value={formData.stall}
-          onValueChange={(value: string) => onUpdateForm({ stall: value })}
-          disabled={!currentBarn}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={currentBarn ? "Select Stall" : "Barn not set"} />
-          </SelectTrigger>
-          <SelectContent>
-            {availableStalls.map((stall) => (
-              <SelectItemExtended
-                key={stall._id}
-                value={stall._id}
-                option={stall.name}
-                description={`Stall in ${currentBarn?.name || ""}`}
-              />
-            ))}
-          </SelectContent>
-        </Select>
+        <Input
+          value={currentStall || ""}
+          disabled
+          placeholder="Farm not set"
+        />
       </FormField>
-      {/* Editable fields */}
-      <FormField label="Pig ID">
+      <FormField label="">
         <PigIdInput
           value={formData.pigId}
           onChange={(value) => onUpdateForm({ pigId: value })}
           onError={(error) => {
-            /* Optionally handle error */
+            /* handle error if needed */
           }}
         />
       </FormField>
-      <FormField label="Tag">
-        <Input
-          name="tag"
-          value={formData.tag}
-          onChange={(e) => onUpdateForm({ tag: e.target.value })}
-          placeholder="Enter pig tag"
-        />
+      <FormField label="Tag (PIG-xxx)">
+        <div className="flex">
+          {/* Tiny disabled "PIG - " */}
+          <Input
+            disabled
+            value="PIG -"
+            className="h-auto w-auto "
+          />
+          {/* The numeric part input */}
+          <Input
+
+            value={formData.tag.replace(/^PIG-?/i, "")}
+            onChange={(e) => {
+              const numericPart = e.target.value.replace(/\D/g, "")
+              onUpdateForm({ tag: `PIG-${numericPart}` })
+            }}
+            placeholder="123"
+          />
+        </div>
       </FormField>
       <FormField label="Breed">
         <Input
@@ -186,8 +213,8 @@ const DetailsForm = ({ formData, onUpdateForm, farms, barns, stalls }: DetailsFo
 }
 
 // -------------------------
-// Feed Form Component
-// Allows the user to upload files and choose a file type.
+// Feed Form
+// -------------------------
 const FeedForm = () => {
   const [files, setFiles] = useState<File[]>([])
   const [selectedFileType, setSelectedFileType] = useState<string>("")
@@ -290,33 +317,43 @@ const FeedForm = () => {
 }
 
 // -------------------------
-// Main Edit Drawer Component
+// Main Edit Drawer
+// -------------------------
 interface PigEditDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  initialData: PigFormData & { _id: string } // pig's backend _id for updating
+  initialData: ServerPigData
 }
 
 export function PigEditDrawer({ open, onOpenChange, initialData }: PigEditDrawerProps) {
-  // Pre-fill form data from the provided pig data.
+  // 1) Parse pigId from "PIG-xxx"
+  const numericId = useMemo(() => getNumericId(initialData.owner), [initialData.owner])
+
+  // 2) Initialize form data: pigId is numeric portion, tag is the entire `owner`
   const [formData, setFormData] = useState<PigFormData>({
-    pigId: initialData.pigId,
-    tag: initialData.tag,
-    farm: initialData.farm,
-    barn: initialData.barn,
-    stall: initialData.stall,
-    breed: initialData.breed,
-    age: initialData.age,
+    pigId: numericId,
+    tag: initialData.owner, // the entire "PIG-xxx"
+    farm: "",
+    barn: "",
+    stall: "",
+    breed: initialData.breed ?? "",
+    age: initialData.costs !== undefined ? String(initialData.costs) : "",
+    currentLocation: {
+      farmId: "",
+      barnId: "",
+      stallId: "",
+    },
   })
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState("details")
 
-  // API data states for farms, barns, and stalls.
+  // 3) Master lists
   const [farms, setFarms] = useState<Farm[]>([])
   const [barns, setBarns] = useState<Barn[]>([])
   const [stalls, setStalls] = useState<Stall[]>([])
 
-  // Fetch farms on mount.
+  // 4) On mount, fetch master farm list
   useEffect(() => {
     axios
       .get("http://localhost:5005/api/farms")
@@ -324,7 +361,7 @@ export function PigEditDrawer({ open, onOpenChange, initialData }: PigEditDrawer
       .catch((err) => console.error("Error fetching farms:", err))
   }, [])
 
-  // For editing, the farm and barn are fixed.
+  // 5) On mount or whenever we get farm, fetch relevant barns
   useEffect(() => {
     if (formData.farm) {
       axios
@@ -336,7 +373,7 @@ export function PigEditDrawer({ open, onOpenChange, initialData }: PigEditDrawer
     }
   }, [formData.farm])
 
-  // Fetch stalls on mount.
+  // 6) On mount, fetch master stalls
   useEffect(() => {
     axios
       .get("http://localhost:5005/api/stalls")
@@ -344,27 +381,45 @@ export function PigEditDrawer({ open, onOpenChange, initialData }: PigEditDrawer
       .catch((err) => console.error("Error fetching stalls:", err))
   }, [])
 
+  // 7) [Important] Fetch location by numeric pigId (the part after "PIG-")
+  // and then set the farm, barn, stall IDs accordingly.
+  useEffect(() => {
+    if (!formData.pigId) return
+    axios
+      .get(`http://localhost:5005/api/pigs/${formData.pigId}`)
+      .then((res) => {
+        // Suppose `res.data` = { farmId: "...", barnId: "...", stallId: "..." }
+        setFormData((prev) => ({
+          ...prev,
+          currentLocation: res.data.currentLocation || "",
+        }))
+      })
+      .catch((err) => console.error("Error fetching pig location:", err))
+  }, [formData.pigId])
+
+  // Helper to update form state
   const handleUpdateForm = (updates: Partial<PigFormData>) => {
     setFormData((prev) => ({ ...prev, ...updates }))
   }
 
+  // 8) Submit changes
   const handleSubmit = async () => {
     setIsSubmitting(true)
     try {
-      // Prepare data to match your Pig model.
+      // If your server expects numeric pigId, parse it:
       const preparedData = {
         pigId: Number(formData.pigId),
-        tag: formData.tag,
+        tag: formData.tag, // "PIG-xxx"
         breed: formData.breed,
         age: Number(formData.age),
         currentLocation: {
-          farmId: formData.farm,
-          barnId: formData.barn,
-          stallId: formData.stall,
+          farmId: formData.currentLocation.farmId,
+          barnId: formData.currentLocation.barnId,
+          stallId: formData.currentLocation.stallId,
         },
       }
-      // PUT request to update the pig using its backend _id.
-      await axios.put(`http://localhost:5005/api/pigs/${initialData._id}`, preparedData)
+      // Example: PUT /api/pigs/85 with data
+      await axios.put(`http://localhost:5005/api/pigs/${formData.pigId}`, preparedData)
       console.log("Pig data updated:", preparedData)
       onOpenChange(false)
     } catch (error) {
@@ -374,9 +429,20 @@ export function PigEditDrawer({ open, onOpenChange, initialData }: PigEditDrawer
     }
   }
 
+  // // Debug logs
+  // console.log("Initial server data =>", initialData)
+  // console.log("Form data =>", formData)
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="overflow-x-hidden sm:max-w-lg">
+        <DrawerHeader className="-px-6 w-full">
+          <DrawerTitle className="flex w-full items-center justify-between">
+            {/* The tag is the entire "PIG-xxx" */}
+            <span>{formData.tag || "No Tag"}</span>
+          </DrawerTitle>
+        </DrawerHeader>
+
         <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val)}>
           <TabsList className="px-6">
             <TabsTrigger value="details" className="px-4">
@@ -386,6 +452,7 @@ export function PigEditDrawer({ open, onOpenChange, initialData }: PigEditDrawer
               Feed
             </TabsTrigger>
           </TabsList>
+
           <TabsContent value="details" className="px-6 py-4">
             <DetailsForm
               formData={formData}
@@ -395,11 +462,13 @@ export function PigEditDrawer({ open, onOpenChange, initialData }: PigEditDrawer
               stalls={stalls}
             />
           </TabsContent>
+
           <TabsContent value="feed" className="px-6 py-4">
             <FeedForm />
           </TabsContent>
         </Tabs>
-        <DrawerFooter className="-mx-6 -mb-2 gap-2 px-6 sm:justify-between">
+
+        <DrawerFooter className="-mx-6 -mb-2 gap-2 px-6">
           <DrawerClose asChild>
             <Button variant="secondary" className="w-full">
               Cancel

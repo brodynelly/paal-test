@@ -1,7 +1,6 @@
 "use client"
 import { siteConfig } from "@/app/siteConfig"
 import { cx, focusRing } from "@/lib/utils"
-import { useUser } from "@clerk/clerk-react"
 import {
   RiDeviceLine,
   RiHome2Line,
@@ -18,7 +17,7 @@ import { UserProfileDesktop } from "./UserProfile"
 const navigation = [
   { name: "Dashboard", href: siteConfig.baseLinks.overview, icon: RiHome2Line },
   { name: "Pig Tables", href: siteConfig.baseLinks.details, icon: RiListCheck },
-  { name: "Device Data", href: siteConfig.baseLinks.support, icon: RiDeviceLine }, 
+  { name: "Device Data", href: siteConfig.baseLinks.support, icon: RiDeviceLine },
   /* {
     name: "Settings",
     href: siteConfig.baseLinks.settings,
@@ -43,8 +42,7 @@ const shortcuts = [
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { isSignedIn } = useUser()
-  if (!isSignedIn) return null
+
   const isActive = (itemHref: string) => {
     // Guard clause to handle undefined href values
     if (!itemHref) return false;
@@ -57,7 +55,7 @@ export function Sidebar() {
   return (
     <>
       {/* sidebar (lg+) */}
-      
+
       <nav className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
         <aside className="flex grow flex-col gap-y-6 overflow-y-auto border-r border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-950">
           <WorkspacesDropdownDesktop />
@@ -84,8 +82,8 @@ export function Sidebar() {
                 </li>
               ))}
             </ul>
-            
-           <div>
+
+            <div>
               <span className="text-xs font-medium leading-6 text-gray-500">
                 Shortcuts
               </span>
@@ -112,16 +110,16 @@ export function Sidebar() {
                 ))}
               </ul>
             </div>
-            
+
           </nav>
           <div className="mt-auto">
-          <UserProfileDesktop />
+            <UserProfileDesktop />
           </div>
         </aside>
       </nav>
       {/* top navbar (xs-lg) */}
       <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-2 shadow-sm sm:gap-x-6 sm:px-4 lg:hidden dark:border-gray-800 dark:bg-gray-950">
-         <WorkspacesDropdownMobile /> 
+        <WorkspacesDropdownMobile />
         <div className="flex items-center gap-1 sm:gap-2">
           <MobileSidebar />
         </div>

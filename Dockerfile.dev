@@ -11,7 +11,7 @@ RUN npm ci
 # Copy all source code (with volume override in development, this step might be skipped)
 COPY . .
 
-ENV HOST=0.0.0.0
+#allow for listening on docker network, but don't expose to main server
 EXPOSE 3000
 
 # Use the Next.js development command
