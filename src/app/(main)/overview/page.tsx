@@ -1,9 +1,10 @@
 "use client"
 
-import { CategoryBarCard } from "@/components/ui/overview/DashboardCategoryBarCard"
 import { ChartCard } from "@/components/ui/overview/DashboardChartCard"
+import FertilityProgressCard from "@/components/ui/overview/DashboardFertilityCard"
 import { Filterbar } from "@/components/ui/overview/DashboardFilterbar"
 import { ProgressBarCard } from "@/components/ui/overview/DashboardProgressBarCard"
+import api from "@/lib/axios"
 import { subscribeToStats } from "@/lib/socket"
 import { subDays } from "date-fns"
 import React from "react"
@@ -68,13 +69,59 @@ const defaultDeviceData: KpiEntry[] = [
 
 const defaultHealthData: KpiEntry[] = [
   {
-    title: "Average BCS",
+    title: "At Risk",
     percentage: 0,
     current: 0,
-    allowed: 5,
+    allowed: 100,
+    unit: "%",
   },
   {
-    title: "Normal Posture",
+    title: "Healthy",
+    percentage: 0,
+    current: 0,
+    allowed: 100,
+    unit: "%",
+  },
+  {
+    title: "Critical",
+    percentage: 0,
+    current: 0,
+    allowed: 100,
+    unit: "%",
+  },
+  {
+    title: "No Movement",
+    percentage: 0,
+    current: 0,
+    allowed: 100,
+    unit: "%",
+  },
+]
+
+const defaultFertilityStatus: KpiEntry[] = [
+  {
+    title: "In-Heat",
+    percentage: 0,
+    current: 0,
+    allowed: 100,
+    unit: "%",
+  },
+  {
+    title: "Pre-Heat",
+    percentage: 0,
+    current: 0,
+    allowed: 100,
+    unit: "%",
+  },
+  {
+    title: "Open",
+    percentage: 0,
+    current: 0,
+    allowed: 100,
+    unit: "%",
+  },
+  {
+    title: "Ready-to-Breed",
     percentage: 0,
     current: 0,
     allowed: 100,
@@ -93,6 +140,8 @@ export default function Overview() {
   )
   const [deviceData, setDeviceData] = React.useState<KpiEntry[]>(defaultDeviceData)
   const [healthData, setHealthData] = React.useState<KpiEntry[]>(defaultHealthData)
+  const [FertilityStatus, setFertilityData] = React.useState<KpiEntry[]>(defaultFertilityStatus)
+
   const [postureDistribution, setPostureDistribution] = React.useState<KpiEntryExtended[]>([])
   const [error, setError] = React.useState<string | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
@@ -121,33 +170,60 @@ export default function Overview() {
         unit: "GB",
       },
     ])
-
-    // Update health data
     setHealthData([
       {
-        title: "Average BCS",
-        percentage: (data.bcsStats.averageBCS / 5) * 100,
-        current: data.bcsStats.averageBCS,
-        allowed: 5,
+        title: "At Risk",
+        percentage: (data.pigHealthStats.totalAtRisk / data.pigStats.totalPigs) * 100,
+        current: data.pigHealthStats.totalAtRisk,
+        allowed: data.pigStats.totalPigs,
       },
       {
-        title: "Normal Posture",
-        percentage: data.postureDistribution.find((p: any) => p.posture === 1)?.percentage || 85,
-        current: 85,
-        allowed: 100,
-        unit: "%",
+        title: "Healthy",
+        percentage: (data.pigHealthStats.totalHealthy / data.pigStats.totalPigs) * 100,
+        current: data.pigHealthStats.totalHealthy,
+        allowed: data.pigStats.totalPigs,
+      },
+      {
+        title: "Critical",
+        percentage: (data.pigHealthStats.totalCritical / data.pigStats.totalPigs) * 100,
+        current: data.pigHealthStats.totalCritical,
+        allowed: data.pigStats.totalPigs,
+      },
+      {
+        title: "No Movement",
+        percentage: (data.pigHealthStats.totalNoMovement / data.pigStats.totalPigs) * 100,
+        current: data.pigHealthStats.totalNoMovement,
+        allowed: data.pigStats.totalPigs,
       },
     ])
 
-    // Update posture distribution
-    setPostureDistribution(
-      data.postureDistribution.map((item: any) => ({
-        title: `Posture ${item.posture}`,
-        percentage: item.percentage,
-        value: `${item.count}`,
-        color: "bg-indigo-600 dark:bg-indigo-500",
-      }))
-    )
+    setFertilityData([
+      {
+        title: "In-Heat",
+        percentage: ((data.pigFertilityStats["InHeat"] ?? 0) / (data.pigStats.totalPigs ?? 1)) * 100,
+        current: data.pigFertilityStats["InHeat"] ?? 0,
+        allowed: data.pigStats.totalPigs ?? 100,
+      },
+      {
+        title: "Pre-Heat",
+        percentage: ((data.pigFertilityStats["PreHeat"] ?? 0) / (data.pigStats.totalPigs ?? 1)) * 100,
+        current: data.pigFertilityStats["PreHeat"] ?? 0,
+        allowed: data.pigStats.totalPigs ?? 100,
+      },
+      {
+        title: "Open",
+        percentage: ((data.pigFertilityStats["Open"] ?? 0) / (data.pigStats.totalPigs ?? 1)) * 100,
+        current: data.pigFertilityStats["Open"] ?? 0,
+        allowed: data.pigStats.totalPigs ?? 100,
+      },
+      {
+        title: "Ready-To-Breed",
+        percentage: ((data.pigFertilityStats["ReadyToBreed"] ?? 0) / (data.pigStats.totalPigs ?? 1)) * 100,
+        current: data.pigFertilityStats["ReadyToBreed"] ?? 0,
+        allowed: data.pigStats.totalPigs ?? 100,
+      },
+    ]);
+
 
     setIsLoading(false)
   }, [])
@@ -156,12 +232,9 @@ export default function Overview() {
   React.useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const response = await fetch('/api/stats')
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        const data = await response.json()
-        updateStats(data)
+        const response = await api.get('/stats')
+        console.log(response.data)
+        updateStats(response.data)
       } catch (error) {
         console.error('Error fetching initial data:', error)
         setError('Failed to fetch initial data. Please try again later.')
@@ -195,6 +268,8 @@ export default function Overview() {
       </div>
     )
   }
+  console.log("FertilityStatus Data:", FertilityStatus);
+
 
   return (
     <>
@@ -226,16 +301,16 @@ export default function Overview() {
             ctaLink="/details"
             data={healthData}
           />
-          <CategoryBarCard
-            title="Posture Distribution"
-            change="+0.8%"
-            value="50"
-            valueDescription="monitored pigs"
-            subtitle="Current distribution"
-            ctaDescription="View detailed"
-            ctaText="posture analysis"
-            ctaLink="/details"
-            data={postureDistribution}
+          
+          <FertilityProgressCard
+            title="Fertility Metrics"
+            change="+1.2%"
+            value="78%"
+            valueDescription="optimal breeding conditions"
+            ctaDescription="3 pigs ready for breeding."
+            ctaText="View details"
+            ctaLink="/fertility-details"
+            data={FertilityStatus}
           />
         </div>
       </section>

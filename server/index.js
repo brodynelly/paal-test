@@ -136,10 +136,37 @@ const emitUpdatedStats = async () => {
     const pigs = await Pig.find({}).sort({ lastUpdate: -1 })
     // If you also store bcsScore or other fields directly in `Pig`, you can derive analytics from them
 
+
     // Optionally get extended pig health/fertility data
     const pigHealthStatuses = await PigHealthStatus.find({ pigId: { $in: pigs.map(pig => pig._id) } })
     const pigFertilityStatuses = await PigFertility.find({ pigId: { $in: pigs.map(pig => pig._id) } })
     const pigHeatStatuses = await PigHeatStatus.find({ pigId: { $in: pigs.map(pig => pig._id) } })
+
+    
+    // Pig Health aggregation
+    const pigHealthAggregated = await PigHealthStatus.aggregate([
+      { $sort: { timestamp: -1 } },
+      { $group: { _id: "$pigId", status: { $first: "$status" } } },
+      { $group: { _id: "$status", count: { $sum: 1 } } }
+    ]);
+
+    const pigHealthStats = pigHealthAggregated.reduce((acc, curr) => {
+      acc[curr._id.replace(/\s+/g, '')] = curr.count;
+      return acc;
+    }, {});
+
+    // Pig Fertility aggregation
+    const pigFertilityAggregated = await PigFertilityStatus.aggregate([
+      { $sort: { timestamp: -1 } }, // Step 1: Sort by latest timestamp
+      { $group: { _id: "$pigId", status: { $first: "$status" } } }, // Step 2: Get latest status per pig
+      { $group: { _id: "$status", count: { $sum: 1 } } } // Step 3: Count total per fertility status
+    ]);
+
+    const pigFertilityStats = pigFertilityAggregated.reduce((acc, curr) => {
+      acc[curr._id.replace(/\s+/g, '')] = curr.count;
+      return acc;
+    }, {});
+
 
     // Transform devices for UI
     const transformedDevices = devices.map(device => ({
@@ -195,8 +222,23 @@ const emitUpdatedStats = async () => {
       bcsStats: {
         averageBCS: Number(avgBCS.toFixed(1))
       },
-      postureDistribution
+      postureDistribution,
       // You can include more combined stats here if you want.
+      pigStats: {
+        totalPigs: pigs.length,
+      },
+      pigHealthStats: {
+        totalAtRisk: pigHealthAggregated.filter(h => h._id === 'at risk')[0]?.count || 0,
+        totalHealthy: pigHealthAggregated.filter(h => h._id === 'healthy')[0]?.count || 0,
+        totalCritical: pigHealthAggregated.filter(h => h._id === 'critical')[0]?.count || 0,
+        totalNoMovement: pigHealthAggregated.filter(h => h._id === 'no movement')[0]?.count || 0,
+      },
+      pigFertilityStats: {
+        InHeat: pigFertilityStats.inheat || 0,
+        PreHeat: pigFertilityAggregated.filter(f => f._id === 'Pre-Heat')[0]?.count || 0,
+        Open: pigFertilityAggregated.filter(f => f._id === 'Open')[0]?.count || 0,
+        ReadyToBreed: pigFertilityAggregated.filter(f => f._id === 'ready to breed')[0]?.count || 0,
+      },
     })
 
     // Emit lists for devices and pigs

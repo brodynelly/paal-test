@@ -2,16 +2,10 @@
 
 import { Button } from "@/components/Button"
 import { cx, focusRing } from "@/lib/utils"
-import { useUser } from "@clerk/nextjs"
 import { RiMore2Fill } from "@remixicon/react"
 import { DropdownUserProfile } from "./DropdownUserProfile"
 
 export const UserProfileDesktop = () => {
-  const { user } = useUser()
-  const initials = user?.firstName && user?.lastName 
-    ? `${user.firstName[0]}${user.lastName[0]}`
-    : user?.emailAddresses[0]?.emailAddress?.substring(0, 2).toUpperCase() || "??"
-
   return (
     <DropdownUserProfile>
       <Button
@@ -27,9 +21,9 @@ export const UserProfileDesktop = () => {
             className="flex size-8 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white text-xs text-gray-700 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300"
             aria-hidden="true"
           >
-            {initials}
+            ??
           </span>
-          <span>{user?.fullName || user?.emailAddresses[0]?.emailAddress}</span>
+          <span>Guest</span>
         </span>
         <RiMore2Fill
           className="size-4 shrink-0 text-gray-500 group-hover:text-gray-700 group-hover:dark:text-gray-400"
@@ -41,11 +35,6 @@ export const UserProfileDesktop = () => {
 }
 
 export const UserProfileMobile = () => {
-  const { user } = useUser()
-  const initials = user?.firstName && user?.lastName 
-    ? `${user.firstName[0]}${user.lastName[0]}`
-    : user?.emailAddresses[0]?.emailAddress?.substring(0, 2).toUpperCase() || "??"
-
   return (
     <DropdownUserProfile align="end">
       <Button
@@ -59,7 +48,7 @@ export const UserProfileMobile = () => {
           className="flex size-7 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white text-xs text-gray-700 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-300"
           aria-hidden="true"
         >
-          {initials}
+          ??
         </span>
       </Button>
     </DropdownUserProfile>

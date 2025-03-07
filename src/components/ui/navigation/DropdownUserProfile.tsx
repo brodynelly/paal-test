@@ -5,14 +5,13 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuSubMenu,
   DropdownMenuSubMenuContent,
   DropdownMenuSubMenuTrigger,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/Dropdown"
 import {
   RiArrowRightUpLine,
@@ -22,7 +21,6 @@ import {
 } from "@remixicon/react"
 import { useTheme } from "next-themes"
 import * as React from "react"
-import { useUser, SignOutButton } from "@clerk/nextjs"
 
 export type DropdownUserProfileProps = {
   children: React.ReactNode
@@ -35,7 +33,6 @@ export function DropdownUserProfile({
 }: DropdownUserProfileProps) {
   const [mounted, setMounted] = React.useState(false)
   const { theme, setTheme } = useTheme()
-  const { user } = useUser()
 
   React.useEffect(() => {
     setMounted(true)
@@ -50,7 +47,6 @@ export function DropdownUserProfile({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
         <DropdownMenuContent align={align}>
-          <DropdownMenuLabel>{user?.emailAddresses[0]?.emailAddress}</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuSubMenu>
               <DropdownMenuSubMenuTrigger>Theme</DropdownMenuSubMenuTrigger>
@@ -121,9 +117,7 @@ export function DropdownUserProfile({
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <SignOutButton>
-              <DropdownMenuItem>Sign out</DropdownMenuItem>
-            </SignOutButton>
+
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>

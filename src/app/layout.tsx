@@ -1,10 +1,10 @@
 import type { Metadata } from "next"
 import { ThemeProvider } from "next-themes"
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 // import { Inter } from "next/font/google"
 import { GeistSans } from "geist/font/sans"
 import "./globals.css"
 import { siteConfig } from "./siteConfig"
-import { ClerkProvider } from "@clerk/nextjs"
 
 import { Sidebar } from "@/components/ui/navigation/Sidebar"
 
@@ -45,20 +45,20 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${GeistSans.className}  overflow-y-scroll scroll-auto antialiased selection:bg-indigo-100 selection:text-indigo-700 dark:bg-gray-950`}
-          suppressHydrationWarning
-        >
-          <div className="mx-auto max-w-screen-2xl">
-            <ThemeProvider defaultTheme="system" attribute="class">
-              <Sidebar />
-              <main className="lg:pl-72">{children}</main>
-            </ThemeProvider>
-          </div>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${GeistSans.className}  overflow-y-scroll scroll-auto antialiased selection:bg-indigo-100 selection:text-indigo-700 dark:bg-gray-950`}
+        suppressHydrationWarning
+      >
+        <div className="mx-auto max-w-screen-2xl">
+          <NuqsAdapter> 
+          <ThemeProvider defaultTheme="system" attribute="class">
+            <Sidebar />
+            <main className="lg:pl-72">{children}</main>
+          </ThemeProvider>
+          </NuqsAdapter> 
+        </div>
+      </body>
+    </html>
   )
 }

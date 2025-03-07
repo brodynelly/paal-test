@@ -1,11 +1,15 @@
 "use client"
 
 import { Badge } from "@/components/Badge"
-import { Card } from "@/components/Card"
-import { LineChart } from "@/components/LineChart"
+// import { Card } from "@/components/Card"
+//import { LineChart } from "@/components/LineChart"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/Tabs"
 import api from "@/lib/axios"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import Header from "./_components/Header"
+import { LineChart } from "./_components/LineChart"
+import { TransactionChart } from "./_components/TransactionChart"
 
 interface PigData {
   _id: string;  // The MongoDB ObjectId as a string
@@ -105,79 +109,73 @@ export default function PigDashboard() {
         {getBCSStatusBadge(pig.age)}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Card>
-          <h3 className="text-lg font-medium">BCS History</h3>
-          <div className="h-[300px] w-full">
-            <LineChart
-              data={bcsHistory.map(record => ({
-                date: record.timestamp,
-                "BCS Score": record.score
-              }))}
-              index="date"
-              categories={["BCS Score"]}
-              colors={["indigo"]}
-              valueFormatter={(value) => value.toFixed(1)}
-              showLegend={false}
-            />
-          </div>
-        </Card>
+      <Header />
+      <section className="my-8">
+        <div className="space-y-12">
+          {/* Daily Integer Value Distribution Chart */}
+          <TransactionChart
+            yAxisWidth={70}
+            type="amount"
+            className="hidden sm:block"
+            showPercentage={true}
+          />
+          {/* optimized for mobile view */}
+          <TransactionChart
+            showYAxis={false}
+            type="amount"
+            className="sm:hidden"
+            showPercentage={true}
+          />
 
-        <Card>
-          <h3 className="text-lg font-medium">Posture History</h3>
-          <div className="h-[300px] w-full">
-            <LineChart
-              data={postureHistory.map(record => ({
-                date: record.timestamp,
-                "Posture": record.score
-              }))}
-              index="date"
-              categories={["Posture"]}
-              colors={["blue"]}
-              valueFormatter={(value) => value.toString()}
-              showLegend={false}
-            />
+          {/* Line Charts with Tabs */}
+          <div className="space-y-4">
+            <Tabs defaultValue="bcs">
+              <TabsList>
+                <TabsTrigger value="bcs">BCS Data</TabsTrigger>
+                <TabsTrigger value="vulva">Vulva Swelling</TabsTrigger>
+                <TabsTrigger value="breathing">Breathing Rate</TabsTrigger>
+              </TabsList>
+              <TabsContent value="bcs">
+                <LineChart
+                  yAxisWidth={70}
+                  type="bcs"
+                  className="hidden sm:block"
+                />
+                <LineChart showYAxis={false} type="bcs" className="sm:hidden" />
+              </TabsContent>
+              <TabsContent value="vulva">
+                <LineChart
+                  yAxisWidth={70}
+                  type="vulva"
+                  className="hidden sm:block"
+                />
+                <LineChart
+                  showYAxis={false}
+                  type="vulva"
+                  className="sm:hidden"
+                />
+              </TabsContent>
+              <TabsContent value="breathing">
+                <LineChart
+                  yAxisWidth={70}
+                  type="breathing"
+                  className="hidden sm:block"
+                />
+                <LineChart
+                  showYAxis={false}
+                  type="breathing"
+                  className="sm:hidden"
+                />
+              </TabsContent>
+            </Tabs>
           </div>
-        </Card>
 
-        <Card>
-          <h3 className="text-lg font-medium">Current Status</h3>
-          <dl className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Age</dt>
-              <dd className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-50">
-                {pig.age} months
-              </dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Current BCS</dt>
-              <dd className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-50">
-                {postureHistory.at.length.toFixed(1)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Current Posture</dt>
-              <dd className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-50">
-                {postureHistory.at.length.toFixed(1)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Last Updated</dt>
-              <dd className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-50">
-                {new Date(pig.lastUpdate).toLocaleString()}
-              </dd>
-            </div>
-          </dl>
-        </Card>
-
-        <Card>
-          <h3 className="text-lg font-medium">Health Analysis</h3>
-          <div className="mt-4 space-y-4">
-            <p className="text-sm text-gray-500">
-            </p>
-          </div>
-        </Card>
-      </div>
+          {/* <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-20">
+            <TransactionChart yAxisWidth={100} type="category" />
+            <TransactionChart yAxisWidth={100} type="merchant" />
+          </div> */}
+        </div>
+      </section>
     </div>
   )
 }

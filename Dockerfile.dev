@@ -11,7 +11,7 @@ RUN npm install
 # Copy all source code (with volume override in development, this step might be skipped)
 COPY . .
 
-EXPOSE 3000
+ EXPOSE 3000
 
 # Use the Next.js development command
 CMD ["npm", "run", "dev:frontend"]
