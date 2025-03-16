@@ -154,12 +154,6 @@ You can check the contents of the key file to confirm it was generated correctly
 
 You should see a long base64-encoded string.
 
-#### Step 5: Start MongoDB with Authentication
-
-Since your `docker-compose.yml` is already mounting the key file to `/etc/secrets/security.keyFile`, simply start your MongoDB container:
-
-    docker compose up --build -d
-
 
 ### 5\. Frontend and Backend Services
 
@@ -186,18 +180,18 @@ Now, let's examine what makes our Docker environment function. Everything is def
 
 You can use a separate override file (e.g., `docker-compose.override.yml`) to differentiate between production and development setups.
 
-Running the Application
+Setting Up Docker Replica Set Information
 -----------------------
 
-### 1\. Start the Docker Containers
+### 1\. Start the Mongo Docker 
 
-    docker compose up --build -d
+    docker compose up --build mongo -d
 
 ### 2\. Initiate the MongoDB Replica Set
 
 Once MongoDB is running, connect to it with authentication from the admin database (this is a seperate database from PAAL that sets the user Auth) :
 
-    mongosh "mongodb://PAAL:PAAL@mongo:27017/admin?authSource=admin"
+    mongosh "mongodb://PAAL:PAAL@127.0.0.1:27017/admin?authSource=admin"
 
 Then, initiate the replica set:
 
@@ -212,7 +206,35 @@ Verify the configuration:
 
     rs.status()
 
-### 3\. Seed the Database (Optional)
+Starting the Application 
+-----------------------
+
+### 1\. closing the mongo Docker Image after Initiating rs0 image 
+
+    docker compose down
+
+this will close the docker image that you created the rs0 image in 
+
+### 2\. Starting the web service 
+
+    docker compose up --build -d
+
+this with start the entire ecosystem for this design where you can access everything. 
+
+### 3\. Start the Development Servers
+
+Make sure your frontend is running on port `8080` and your backend on port `8080/api`. Access the frontend via `http://localhost:8080/`.
+
+### 4\. Verify Connectivity
+
+*   **Test Application:** Run the application to ensure it connects to MongoDB correctly.
+*   **Check Containers:** Use `docker ps` to verify that all containers are running.
+*   **Logs:** For troubleshooting, view logs with:
+    
+        docker-compose logs mongo
+
+  
+### 6\. Seed the Database (Optional)
 
 Now, when you first load the DB there will be no data. Lets populate it with some prop data, run:
 
@@ -220,18 +242,6 @@ Now, when you first load the DB there will be no data. Lets populate it with som
     npm run seed
 
 *We first load into the Docker CLI to execute our seed command, because the connection to the database is over the docker-network*
-
-### 4\. Start the Development Servers
-
-Make sure your frontend is running on port `3000` and your backend on port `5005`. Access the frontend via `http://localhost:3000`.
-
-### 5\. Verify Connectivity
-
-*   **Test Application:** Run the application to ensure it connects to MongoDB correctly.
-*   **Check Containers:** Use `docker ps` to verify that all containers are running.
-*   **Logs:** For troubleshooting, view logs with:
-    
-        docker-compose logs mongo
     
 
 Backup & Restore
