@@ -29,6 +29,11 @@ const navigation = [
 
 const shortcuts = [
   {
+    name: "PAAL Wiki Page",
+    href: "https://github.com/brodynelly/paal-test/wiki",
+    icon: RiLinkM,
+  },
+  {
     name: "PAAL Landing Page",
     href: "https://cafnrfaculty.missouri.edu/mupaa/",
     icon: RiLinkM,

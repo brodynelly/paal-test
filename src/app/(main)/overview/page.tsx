@@ -1,19 +1,23 @@
-"use client"
+"use client";
 
-import { ChartCard } from "@/components/ui/overview/DashboardChartCard"
-import FertilityProgressCard from "@/components/ui/overview/DashboardFertilityCard"
-import { Filterbar } from "@/components/ui/overview/DashboardFilterbar"
-import { ProgressBarCard } from "@/components/ui/overview/DashboardProgressBarCard"
-import api from "@/lib/axios"
-import { subscribeToStats } from "@/lib/socket"
-import { subDays } from "date-fns"
-import React from "react"
-import { DateRange } from "react-day-picker"
+import { ChartCard } from "@/components/ui/overview/DashboardChartCard";
+import FertilityProgressCard from "@/components/ui/overview/DashboardFertilityCard";
+import { Filterbar } from "@/components/ui/overview/DashboardFilterbar";
+import { ProgressBarCard } from "@/components/ui/overview/DashboardProgressBarCard";
+import { BarnStallCard } from "@/components/ui/overview/DashboardStallBarCard";
+import api from "@/lib/axios";
+import { subscribeToStats } from "@/lib/socket";
+import { subDays } from "date-fns";
+import React from "react";
+import { DateRange } from "react-day-picker";
 
-export type PeriodValue = "previous-period" | "last-year" | "no-comparison"
+export type PeriodValue = "previous-period" | "last-year" | "no-comparison";
+
+const fake = ["Pigs In Heat", "Pigs In Critical", "Total Pigs"]
 
 const categories: { title: "Temperature" | "BCS Score" | "Posture"; type: "unit" | "currency"; }[] = [
   {
+
     title: "Temperature",
     type: "unit",
   },
@@ -25,24 +29,25 @@ const categories: { title: "Temperature" | "BCS Score" | "Posture"; type: "unit"
     title: "Posture",
     type: "unit",
   },
-]
+];
 
 export type KpiEntry = {
-  title: string
-  percentage: number
-  current: number
-  allowed: number
-  unit?: string
-}
+  title: string;
+  percentage: number;
+  current: number;
+  allowed: number;
+  unit?: string;
+};
 
 export type KpiEntryExtended = {
-  title: string
-  percentage: number
-  value: string
-  color: string
-}
+  title: string;
+  percentage: number;
+  current: number;
+  allowed: number;
+  parent?: string;
+};
 
-const maxDate = new Date()
+const maxDate = new Date();
 
 const defaultDeviceData: KpiEntry[] = [
   {
@@ -65,7 +70,7 @@ const defaultDeviceData: KpiEntry[] = [
     allowed: 10,
     unit: "GB",
   },
-]
+];
 
 const defaultHealthData: KpiEntry[] = [
   {
@@ -96,7 +101,7 @@ const defaultHealthData: KpiEntry[] = [
     allowed: 100,
     unit: "%",
   },
-]
+];
 
 const defaultFertilityStatus: KpiEntry[] = [
   {
@@ -127,24 +132,28 @@ const defaultFertilityStatus: KpiEntry[] = [
     allowed: 100,
     unit: "%",
   },
-]
+];
 
 export default function Overview() {
   const [selectedDates, setSelectedDates] = React.useState<DateRange | undefined>({
     from: subDays(maxDate, 7),
     to: maxDate,
-  })
-  const [selectedPeriod, setSelectedPeriod] = React.useState<PeriodValue>("previous-period")
+  });
+  const [selectedPeriod, setSelectedPeriod] = React.useState<PeriodValue>("previous-period");
   const [selectedCategories, setSelectedCategories] = React.useState<string[]>(
     categories.map((category) => category.title),
-  )
-  const [deviceData, setDeviceData] = React.useState<KpiEntry[]>(defaultDeviceData)
-  const [healthData, setHealthData] = React.useState<KpiEntry[]>(defaultHealthData)
-  const [FertilityStatus, setFertilityData] = React.useState<KpiEntry[]>(defaultFertilityStatus)
+  );
+  const [deviceData, setDeviceData] = React.useState<KpiEntry[]>(defaultDeviceData);
+  const [healthData, setHealthData] = React.useState<KpiEntry[]>(defaultHealthData);
+  const [FertilityStatus, setFertilityData] = React.useState<KpiEntry[]>(defaultFertilityStatus);
+  const [heatStats, setHeatStats] = React.useState<KpiEntry[]>([]); // New state for heat stats
+  const [barnStats, setBarnStats] = React.useState<KpiEntry[]>([]); // New state for barn stats
+  const [stallStats, setStallStats] = React.useState<KpiEntryExtended[]>([]); // New state for stall stats
+  const [selectedBarn, setSelectedBarn] = React.useState<string | null>(null); // New state for selected barn
 
-  const [postureDistribution, setPostureDistribution] = React.useState<KpiEntryExtended[]>([])
-  const [error, setError] = React.useState<string | null>(null)
-  const [isLoading, setIsLoading] = React.useState(true)
+  const [postureDistribution, setPostureDistribution] = React.useState<KpiEntryExtended[]>([]);
+  const [error, setError] = React.useState<string | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const updateStats = React.useCallback((data: any) => {
     // Update device data
@@ -169,7 +178,9 @@ export default function Overview() {
         allowed: 10,
         unit: "GB",
       },
-    ])
+    ]);
+
+    // Update health data
     setHealthData([
       {
         title: "At Risk",
@@ -195,8 +206,9 @@ export default function Overview() {
         current: data.pigHealthStats.totalNoMovement,
         allowed: data.pigStats.totalPigs,
       },
-    ])
+    ]);
 
+    // Update fertility data
     setFertilityData([
       {
         title: "In-Heat",
@@ -224,9 +236,71 @@ export default function Overview() {
       },
     ]);
 
+    // Update heat stats
+    setHeatStats([
+      {
+        title: "Open",
+        percentage: ((data.pigHeatStats.totalOpen ?? 0) / (data.pigStats.totalPigs ?? 1)) * 100,
+        current: data.pigHeatStats.totalOpen ?? 0,
+        allowed: data.pigStats.totalPigs ?? 100,
+      },
+      {
+        title: "Bred",
+        percentage: ((data.pigHeatStats.totalBred ?? 0) / (data.pigStats.totalPigs ?? 1)) * 100,
+        current: data.pigHeatStats.totalBred ?? 0,
+        allowed: data.pigStats.totalPigs ?? 100,
+      },
+      {
+        title: "Pregnant",
+        percentage: ((data.pigHeatStats.totalPregnant ?? 0) / (data.pigStats.totalPigs ?? 1)) * 100,
+        current: data.pigHeatStats.totalPregnant ?? 0,
+        allowed: data.pigStats.totalPigs ?? 100,
+      },
+      {
+        title: "Farrowing",
+        percentage: ((data.pigHeatStats.totalFarrowing ?? 0) / (data.pigStats.totalPigs ?? 1)) * 100,
+        current: data.pigHeatStats.totalFarrowing ?? 0,
+        allowed: data.pigStats.totalPigs ?? 100,
+      },
+      {
+        title: "Weaning",
+        percentage: ((data.pigHeatStats.totalWeaning ?? 0) / (data.pigStats.totalPigs ?? 1)) * 100,
+        current: data.pigHeatStats.totalWeaning ?? 0,
+        allowed: data.pigStats.totalPigs ?? 100,
+      },
+    ]);
 
-    setIsLoading(false)
-  }, [])
+    // Update barn stats
+    const barnStatsData = Object.entries(data.barnStats).map(([barnName, totalPigs]) => ({
+      title: barnName,
+      percentage: ((totalPigs as number) / data.pigStats.totalPigs) * 100,
+      current: totalPigs as number,
+      allowed: data.pigStats.totalPigs,
+    }));
+    setBarnStats(barnStatsData);
+
+    // Update stall stats
+    const stallStatsData: KpiEntryExtended[] = [];
+    Object.entries(data.stallStats).forEach(([barnName, stalls]) => {
+      Object.entries(stalls as Record<string, number>).forEach(([stallName, totalPigs]) => {
+        stallStatsData.push({
+          title: stallName,
+          percentage: ((totalPigs as number) / data.pigStats.totalPigs) * 100,
+          current: totalPigs as number,
+          allowed: data.pigStats.totalPigs,
+          parent: barnName, // Indicates which barn this stall belongs to
+        });
+      });
+    });
+    setStallStats(stallStatsData);
+
+    // Set the first barn as selected by default
+    if (barnStatsData.length > 0) {
+      setSelectedBarn(barnStatsData[0].title);
+    }
+
+    setIsLoading(false);
+  }, []);
 
   // Initial data fetch
   React.useEffect(() => {
@@ -293,7 +367,7 @@ export default function Overview() {
           />
           <ProgressBarCard
             title="Health Metrics"
-            change="-0.5%"
+            change="Healthy"
             value="85%"
             valueDescription="normal health indicators"
             ctaDescription="2 pigs require attention."
@@ -301,16 +375,45 @@ export default function Overview() {
             ctaLink="/details"
             data={healthData}
           />
-          
+
+          <BarnStallCard
+            title="Barn/Stall Metrics"
+            change="Farm 1"
+            value="121"
+            valueDescription="Total Pigs"
+            ctaDescription="View stall details."
+            ctaText="View details"
+            ctaLink="/barn-stall-details"
+            data={
+              selectedBarn
+                ? stallStats.filter((stall) => stall.parent === selectedBarn)
+                : []
+            }
+            barns={barnStats.map((barn) => ({ title: barn.title }))} // Convert barnStats to the required format
+            selectedBarn={selectedBarn}
+            onBarnSelect={(barn) => setSelectedBarn(barn)}
+          />
+
           <FertilityProgressCard
             title="Fertility Metrics"
-            change="+1.2%"
+            change=""
             value="78%"
             valueDescription="optimal breeding conditions"
             ctaDescription="3 pigs ready for breeding."
             ctaText="View details"
             ctaLink="/fertility-details"
             data={FertilityStatus}
+          />
+
+          <FertilityProgressCard
+            title="Heat Metrics"
+            change=""
+            value="89%"
+            valueDescription="optimal breeding conditions"
+            ctaDescription="3 pigs ready for breeding."
+            ctaText="View details"
+            ctaLink="/heat-status"
+            data={heatStats}
           />
         </div>
       </section>
@@ -337,7 +440,7 @@ export default function Overview() {
         <dl className="mt-10 grid grid-cols-1 gap-14 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
           {categories
             .filter((category) => selectedCategories.includes(category.title))
-            .map((category) => (
+            .map((category, fake) => (
               <ChartCard
                 key={category.title}
                 title={category.title}

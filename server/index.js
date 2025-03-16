@@ -36,6 +36,7 @@ app.use('/api/devices', require('./routes/devices'))      // updated to match yo
 app.use('/api/pigs', require('./routes/pig'))            // updated to match your pig.js
 app.use('/api/temperature', require('./routes/temperatureData'))
 app.use('/api/stats', require('./routes/stats'))
+app.use('/api/upload/postureupload', require('./routes/upload/postureUpload')) // llisten for uploaded csvs 
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Database Connection

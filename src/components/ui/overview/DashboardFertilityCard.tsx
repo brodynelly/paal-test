@@ -1,7 +1,10 @@
-import { DonutChart } from "@/components/DonutChart";
-import { Card, ProgressBar } from "@tremor/react";
+import { cx } from "@/lib/utils";
 
 import { Badge } from "@/components/Badge";
+
+import { Card } from "@/components/Card";
+import { DonutChart } from "@/components/DonutChart";
+import { ProgressCircle } from "@/components/ProgressCircle_S";
 
 export type KpiEntry = {
   title: string;
@@ -45,6 +48,15 @@ export default function FertilityProgressCard({
 
   // Assign colors dynamically
   const colors = ["cyan", "blue", "indigo", "violet"];
+  const bgColors = [
+    "bg-cyan-500",  // Cyan
+    "bg-blue-500",   // Blue
+    "bg-indigo-500", // Indigo
+    "bg-violet-500",  // Violet
+  ];
+
+
+  var count: number = 0;
 
   // Transform data to match Tremor DonutChart format
   const formattedData = data.map((item, idx) => ({
@@ -65,6 +77,37 @@ export default function FertilityProgressCard({
           </dt>
           <Badge variant="neutral">{change}</Badge>
         </div>
+
+        <div className="flex justify-center items-center my-6">
+          <ProgressCircle value={data[0].percentage} radius={80} strokeWidth={7}> 
+            <ProgressCircle value={data[1].percentage} radius={70} strokeWidth={7}>
+              <ProgressCircle
+                value={data[2].percentage}
+                radius={60}
+                strokeWidth={7}
+                variant="success"
+              >
+                <ProgressCircle
+                  value={data[3].percentage}
+                  radius={50}
+                  strokeWidth={7}
+                  variant="warning"
+                >
+                  <p>
+                    <span className="text-lg font-semibold text-gray-900 dark:text-gray-50">
+                      7.8
+                    </span>
+                    <span className="text-sm text-gray-500 dark:text-gray-500">
+                      /10
+                    </span>
+                  </p>
+                </ProgressCircle>
+              </ProgressCircle>
+            </ProgressCircle>
+          </ProgressCircle> 
+        </div>
+
+
         <dd className="mt-2 flex items-baseline gap-2">
           <span className="text-xl text-gray-900 dark:text-gray-50">
             {value}
@@ -72,39 +115,42 @@ export default function FertilityProgressCard({
           <span className="text-sm text-gray-500">{valueDescription}</span>
         </dd>
 
-        {/* Donut Chart */}
-        <div className="flex justify-center items-center my-6">
-          <DonutChart
-            className="w-full max-w-xs" // Responsive width
-            data={formattedData}
-            category="value"
-            index="name"
-            valueFormatter={percentageFormatter}
-            showTooltip={true}
-            colors={colors}
-          />
+        {/* <li key={item.title} className="flex items-center gap-2 text-xs">
+                        <span
+                          className={cx(item.color, "size-2.5 rounded-sm")}
+                          aria-hidden="true"
+                        />
+                        <span className="text-gray-900 dark:text-gray-50">
+                          {item.title}
+                        </span>
+                        <span className="text-gray-600 dark:text-gray-400">
+                          ({item.value} / {item.percentage}%)
+                        </span>
+                      </li> */}
+        <div className="mt-2 flex items-center gap-0.5">
+          {data.map((item, idx) => (
+            <div
+              key={item.title}
+              className={cx(bgColors[idx % colors.length], `h-1.5 rounded-full`)}
+              style={{ width: `${item.percentage}%` }}
+            />
+          ))}
         </div>
 
         {/* List of Pig Fertility Stats */}
         <ul role="list" className="mt-4 space-y-5">
-          {data.map((item) => (
-            <li key={item.title}>
-              <p className="flex justify-between text-sm">
-                <span className="font-medium text-gray-900 dark:text-gray-50">
-                  {item.title}
-                </span>
-                <span className="font-medium text-gray-900 dark:text-gray-50">
-                  {item.current}
-                  <span className="font-normal text-gray-500">
-                    /{item.allowed}
-                  </span>
-                </span>
-              </p>
-              <ProgressBar
-                value={item.current}
-                className="mt-2 [&>*]:h-1.5"
-                colors={colors}
+          {data.map((item, idx) => (
+            <li key={item.title} className="flex items-center gap-2 text-xs">
+              <span
+                className={cx(bgColors[idx % colors.length], "size-2.5 rounded-sm")}
+                aria-hidden="true"
               />
+              <span className="text-gray-900 dark:text-gray-50">
+                {item.title}
+              </span>
+              <span className="text-gray-600 dark:text-gray-400">
+                ({item.current} / {item.allowed})
+              </span>
             </li>
           ))}
         </ul>

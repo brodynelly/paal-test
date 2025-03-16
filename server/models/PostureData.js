@@ -15,7 +15,7 @@ const { Schema } = mongoose;
 const PigPostureSchema = new Schema({
   pigId: { type: Schema.Types.ObjectId, ref: 'Pig', required: true },
   timestamp: { type: Date, default: Date.now },
-  score: { type: Number, min: 1, max: 5, required: true }
+  score: { type: Number, min: 0, max: 5, required: true }
 });
 
 module.exports = mongoose.model('PigPosture', PigPostureSchema);
