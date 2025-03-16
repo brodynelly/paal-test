@@ -48,7 +48,13 @@ Getting Started
 
 This command creates a new branch named `localDev` and switches you to it. Remember to replace `<user_name>` with your own git username. All changes you make now will be isolated from the main branch.
 
-### 3\. Set Up Environment Variables
+### 3\. CInstall Local Dependancies with NPM 
+
+    npm install
+
+this command allows you to install the local depos for the web application. This is crucial in actually running the application and not running into compile time errors with docker 
+
+### 4\. Set Up Environment Variables
 
 Create a `.env` file in the root directory with the following content (adjust as needed):
 
@@ -66,10 +72,6 @@ Create a `.env` file in the root directory with the following content (adjust as
     SERVER_HOST=server-c
     SERVER_PORT=5005
     PORT=3000
-    
-    # Clerk Environment Variables (if applicable)
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_publishable_key_here (reach out to me if need) 
-    CLERK_SECRET_KEY=your_secret_key_here (reach out to me if need) 
     
     # Clerk URLs
     NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
@@ -156,7 +158,7 @@ You should see a long base64-encoded string.
 
 Since your `docker-compose.yml` is already mounting the key file to `/etc/secrets/security.keyFile`, simply start your MongoDB container:
 
-    docker-compose up -d
+    docker compose up --build -d
 
 
 ### 5\. Frontend and Backend Services
@@ -189,7 +191,7 @@ Running the Application
 
 ### 1\. Start the Docker Containers
 
-    docker-compose up -d
+    docker compose up --build -d
 
 ### 2\. Initiate the MongoDB Replica Set
 
