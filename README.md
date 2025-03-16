@@ -58,6 +58,9 @@ this command allows you to install the local depos for the web application. This
 
 Create a `.env` file in the root directory with the following content (adjust as needed):
 
+# API URL FOR NEXT APP
+NEXT_PUBLIC_BASE_URL=http://localhost:8080
+
     # MongoDB Initialization Variables
     MONGO_INITDB_ROOT_USERNAME=PAAL 
     MONGO_INITDB_ROOT_PASSWORD=PAAL
@@ -80,7 +83,9 @@ Create a `.env` file in the root directory with the following content (adjust as
     NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/overview
     
     # API URL for React App
-    REACT_APP_API_URL=http://server-c:5005
+    REACT_APP_API_URL=http://localhost:8080
+    NEXT_PUBLIC_API_URL=http://localhost:8080
+
 
 Docker Compose automatically loads a file named `.env` from the root directory when you run `docker compose up`.
 
