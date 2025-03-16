@@ -52,6 +52,7 @@ export default function PigDashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+
   useEffect(() => {
     const fetchPigData = async () => {
       try {
@@ -126,6 +127,21 @@ export default function PigDashboard() {
             className="sm:hidden"
             showPercentage={true}
           />
+          {/* 
+<LineChart
+          className="mt-6 h-32"
+          data={chartData || []}
+          index="formattedDate"
+          colors={["indigo", "gray"]}
+          startEndOnly={true}
+          valueFormatter={(value) => formatter(value as number)}
+          showYAxis={false}
+          showLegend={false}
+          categories={categories}
+          showTooltip={isThumbnail ? false : true}
+          autoMinValue
+        />
+      </div> */}
 
           {/* Line Charts with Tabs */}
           <div className="space-y-4">
@@ -139,7 +155,12 @@ export default function PigDashboard() {
                 <LineChart
                   yAxisWidth={70}
                   type="bcs"
-                  className="hidden sm:block"
+                  //className="hidden sm:block"
+                  startEndOnly={true}
+                  showYAxis={true}
+                  showLegend={false}
+                  showTooltip={true}
+                  autoMinValue
                 />
                 <LineChart showYAxis={false} type="bcs" className="sm:hidden" />
               </TabsContent>

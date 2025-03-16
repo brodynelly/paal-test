@@ -13,8 +13,11 @@ import { DateRange } from "react-day-picker";
 
 export type PeriodValue = "previous-period" | "last-year" | "no-comparison";
 
+const fake = ["Pigs In Heat", "Pigs In Critical", "Total Pigs"]
+
 const categories: { title: "Temperature" | "BCS Score" | "Posture"; type: "unit" | "currency"; }[] = [
   {
+
     title: "Temperature",
     type: "unit",
   },
@@ -364,7 +367,7 @@ export default function Overview() {
           />
           <ProgressBarCard
             title="Health Metrics"
-            change="-0.5%"
+            change="Healthy"
             value="85%"
             valueDescription="normal health indicators"
             ctaDescription="2 pigs require attention."
@@ -375,9 +378,9 @@ export default function Overview() {
 
           <BarnStallCard
             title="Barn/Stall Metrics"
-            change="+2.5%"
-            value="90%"
-            valueDescription="stalls occupied"
+            change="Farm 1"
+            value="121"
+            valueDescription="Total Pigs"
             ctaDescription="View stall details."
             ctaText="View details"
             ctaLink="/barn-stall-details"
@@ -393,7 +396,7 @@ export default function Overview() {
 
           <FertilityProgressCard
             title="Fertility Metrics"
-            change="+1.2%"
+            change=""
             value="78%"
             valueDescription="optimal breeding conditions"
             ctaDescription="3 pigs ready for breeding."
@@ -404,7 +407,7 @@ export default function Overview() {
 
           <FertilityProgressCard
             title="Heat Metrics"
-            change="+1.2%"
+            change=""
             value="89%"
             valueDescription="optimal breeding conditions"
             ctaDescription="3 pigs ready for breeding."
@@ -437,7 +440,7 @@ export default function Overview() {
         <dl className="mt-10 grid grid-cols-1 gap-14 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
           {categories
             .filter((category) => selectedCategories.includes(category.title))
-            .map((category) => (
+            .map((category, fake) => (
               <ChartCard
                 key={category.title}
                 title={category.title}

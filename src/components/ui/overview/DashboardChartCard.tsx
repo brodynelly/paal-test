@@ -64,7 +64,7 @@ export const ChartCard = React.memo(function ChartCard({
     [selectedDates]
   )
 
-  const prevDates = React.useMemo(() => 
+  const prevDates = React.useMemo(() =>
     getPeriod(selectedDates, selectedPeriod),
     [selectedDates, selectedPeriod]
   )
@@ -76,7 +76,7 @@ export const ChartCard = React.memo(function ChartCard({
     [prevDates]
   )
 
-  const data = React.useMemo(() => 
+  const data = React.useMemo(() =>
     overviewData
       .filter((overview) => {
         if (selectedDatesInterval) {
@@ -89,7 +89,7 @@ export const ChartCard = React.memo(function ChartCard({
     [selectedDatesInterval]
   )
 
-  const prevData = React.useMemo(() => 
+  const prevData = React.useMemo(() =>
     overviewData
       .filter((overview) => {
         if (prevDatesInterval) {
@@ -102,7 +102,7 @@ export const ChartCard = React.memo(function ChartCard({
     [prevDatesInterval]
   )
 
-  const chartData = React.useMemo(() => 
+  const chartData = React.useMemo(() =>
     allDatesInInterval
       ?.map((date, index) => {
         const overview = data[index]
@@ -135,22 +135,22 @@ export const ChartCard = React.memo(function ChartCard({
 
   const categories =
     selectedPeriod === "no-comparison" ? ["value"] : ["value", "previousValue"]
-  
-  const value = React.useMemo(() => 
+
+  const value = React.useMemo(() =>
     Number(
       (data?.reduce((acc, item) => acc + Number(item[title] || 0), 0) || 0).toFixed(4)
     ),
     [data, title]
   )
 
-  const previousValue = React.useMemo(() => 
+  const previousValue = React.useMemo(() =>
     Number(
       (prevData?.reduce((acc, item) => acc + Number(item[title] || 0), 0) || 0).toFixed(4)
     ),
     [prevData, title]
   )
-  
-  const evolution = React.useMemo(() => 
+
+  const evolution = React.useMemo(() =>
     selectedPeriod !== "no-comparison"
       ? Number(((value - previousValue) / previousValue).toFixed(4))
       : 0,

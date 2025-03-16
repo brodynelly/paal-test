@@ -23,7 +23,7 @@ import { usePathname } from "next/navigation"
 const navigation = [
   { name: "Dashboard", href: siteConfig.baseLinks.overview, icon: RiHome2Line },
   { name: "Pig Tables", href: siteConfig.baseLinks.details, icon: RiListCheck },
-  { name: "Device Data", href: siteConfig.baseLinks.support, icon: RiDeviceLine }, 
+  { name: "Device Data", href: siteConfig.baseLinks.support, icon: RiDeviceLine },
   /* {
     name: "Settings",
     href: siteConfig.baseLinks.settings,
@@ -33,6 +33,11 @@ const navigation = [
 ] as const
 
 const shortcuts = [
+  {
+    name: "PAAL Documentation Page",
+    href: "https://github.com/brodynelly/paal-test/wiki",
+    icon: RiLinkM,
+  },
   {
     name: "PAAL Landing Page",
     href: "https://cafnrfaculty.missouri.edu/mupaa/",
