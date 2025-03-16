@@ -242,6 +242,17 @@ Now, when you first load the DB there will be no data. Lets populate it with som
     npm run seed
 
 *We first load into the Docker CLI to execute our seed command, because the connection to the database is over the docker-network*
+
+Connecting to Database Via Compass 
+---------------------
+
+## Using mongodb Compass. 
+
+### 1\. Open compass connection window and enter this connection string 
+    
+    mongodb://PAAL:PAAL@localhost:27017/?directConnection=true
+
+This will allow you to connect directly connect to the database via compass to see visual changes and updated to the database. 
     
 
 Backup & Restore
