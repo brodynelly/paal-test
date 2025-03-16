@@ -59,8 +59,8 @@ this command allows you to install the local depos for the web application. This
 Create a `.env` file in the root directory with the following content (adjust as needed):
 
     # MongoDB Initialization Variables
-    MONGO_INITDB_ROOT_USERNAME=<username> 
-    MONGO_INITDB_ROOT_PASSWORD=<password> 
+    MONGO_INITDB_ROOT_USERNAME=PAAL 
+    MONGO_INITDB_ROOT_PASSWORD=PAAL
     MONGO_INITDB_DATABASE=paalab
     
     # MongoDB Connection Settings
