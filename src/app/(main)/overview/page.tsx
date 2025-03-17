@@ -1,5 +1,4 @@
 "use client";
-
 import { ChartCard } from "@/components/ui/overview/DashboardChartCard";
 import FertilityProgressCard from "@/components/ui/overview/DashboardFertilityCard";
 import { Filterbar } from "@/components/ui/overview/DashboardFilterbar";
@@ -13,20 +12,17 @@ import { DateRange } from "react-day-picker";
 
 export type PeriodValue = "previous-period" | "last-year" | "no-comparison";
 
-const fake = ["Pigs In Heat", "Pigs In Critical", "Total Pigs"]
-
-const categories: { title: "Temperature" | "BCS Score" | "Posture"; type: "unit" | "currency"; }[] = [
+const categories = [
   {
-
-    title: "Temperature",
+    title: "Total Pigs",
     type: "unit",
   },
   {
-    title: "BCS Score",
+    title: "Heat Status",
     type: "unit",
   },
   {
-    title: "Posture",
+    title: "Fertility Status",
     type: "unit",
   },
 ];
@@ -134,6 +130,27 @@ const defaultFertilityStatus: KpiEntry[] = [
   },
 ];
 
+type TimeSeriesMetrics = {
+  totalPigs: number;
+  totalPigsInHeat: number;
+  totalPigsReadyToBreed: number;
+  fertilityStatus: {
+    inHeat: number;
+    preHeat: number;
+    open: number;
+    readyToBreed: number;
+  };
+  heatStatus: {
+    open: number;
+    bred: number;
+    pregnant: number;
+    farrowing: number;
+    weaning: number;
+  };
+};
+
+type TimeSeriesData = Record<string, TimeSeriesMetrics>;
+
 export default function Overview() {
   const [selectedDates, setSelectedDates] = React.useState<DateRange | undefined>({
     from: subDays(maxDate, 7),
@@ -143,14 +160,14 @@ export default function Overview() {
   const [selectedCategories, setSelectedCategories] = React.useState<string[]>(
     categories.map((category) => category.title),
   );
+  const [timeSeriesData, setTimeSeriesData] = React.useState<TimeSeriesData>({});
   const [deviceData, setDeviceData] = React.useState<KpiEntry[]>(defaultDeviceData);
   const [healthData, setHealthData] = React.useState<KpiEntry[]>(defaultHealthData);
   const [FertilityStatus, setFertilityData] = React.useState<KpiEntry[]>(defaultFertilityStatus);
-  const [heatStats, setHeatStats] = React.useState<KpiEntry[]>([]); // New state for heat stats
-  const [barnStats, setBarnStats] = React.useState<KpiEntry[]>([]); // New state for barn stats
-  const [stallStats, setStallStats] = React.useState<KpiEntryExtended[]>([]); // New state for stall stats
-  const [selectedBarn, setSelectedBarn] = React.useState<string | null>(null); // New state for selected barn
-
+  const [heatStats, setHeatStats] = React.useState<KpiEntry[]>([]);
+  const [barnStats, setBarnStats] = React.useState<KpiEntry[]>([]);
+  const [stallStats, setStallStats] = React.useState<KpiEntryExtended[]>([]);
+  const [selectedBarn, setSelectedBarn] = React.useState<string | null>(null);
   const [postureDistribution, setPostureDistribution] = React.useState<KpiEntryExtended[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -288,7 +305,7 @@ export default function Overview() {
           percentage: ((totalPigs as number) / data.pigStats.totalPigs) * 100,
           current: totalPigs as number,
           allowed: data.pigStats.totalPigs,
-          parent: barnName, // Indicates which barn this stall belongs to
+          parent: barnName,
         });
       });
     });
@@ -302,37 +319,88 @@ export default function Overview() {
     setIsLoading(false);
   }, []);
 
+  // Fetch time-series data
+  React.useEffect(() => {
+    const fetchTimeSeriesData = async () => {
+      try {
+        const response = await api.get<TimeSeriesData>('/pigs/analytics/time-series');
+        setTimeSeriesData(response.data);
+      } catch (error) {
+        console.error('Error fetching time-series data:', error);
+      }
+    };
+
+    fetchTimeSeriesData();
+  }, []);
+
+  // Transform time-series data for the ChartCard component
+  const chartData = React.useMemo(() => {
+    return Object.entries(timeSeriesData).map(([date, metrics]) => ({
+      date,
+      totalPigs: metrics.totalPigs,
+      totalPigsInHeat: metrics.totalPigsInHeat,
+      totalPigsReadyToBreed: metrics.totalPigsReadyToBreed,
+    }));
+  }, [timeSeriesData]);
+
+  const heatChartData = React.useMemo(() => {
+    return Object.entries(timeSeriesData).map(([date, metrics]) => ({
+      date,
+      totalPigs: metrics.totalPigs, // Include required properties
+      totalPigsInHeat: metrics.totalPigsInHeat,
+      totalPigsReadyToBreed: metrics.totalPigsReadyToBreed,
+      open: metrics.heatStatus.open,
+      bred: metrics.heatStatus.bred,
+      pregnant: metrics.heatStatus.pregnant,
+      farrowing: metrics.heatStatus.farrowing,
+      weaning: metrics.heatStatus.weaning,
+    }));
+  }, [timeSeriesData]);
+
+  const fertilityChartData = React.useMemo(() => {
+    return Object.entries(timeSeriesData).map(([date, metrics]) => ({
+      date,
+      totalPigs: metrics.totalPigs, // Include required properties
+      totalPigsInHeat: metrics.totalPigsInHeat,
+      totalPigsReadyToBreed: metrics.totalPigsReadyToBreed,
+      inHeat: metrics.fertilityStatus.inHeat,
+      preHeat: metrics.fertilityStatus.preHeat,
+      open: metrics.fertilityStatus.open,
+      readyToBreed: metrics.fertilityStatus.readyToBreed,
+    }));
+  }, [timeSeriesData]);
+
   // Initial data fetch
   React.useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const response = await api.get('/stats')
-        console.log(response.data)
-        updateStats(response.data)
+        const response = await api.get('/stats');
+        console.log(response.data);
+        updateStats(response.data);
       } catch (error) {
-        console.error('Error fetching initial data:', error)
-        setError('Failed to fetch initial data. Please try again later.')
-        setIsLoading(false)
+        console.error('Error fetching initial data:', error);
+        setError('Failed to fetch initial data. Please try again later.');
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchInitialData()
-  }, [updateStats])
+    fetchInitialData();
+  }, [updateStats]);
 
   // Subscribe to real-time updates
   React.useEffect(() => {
-    const unsubscribe = subscribeToStats(updateStats)
+    const unsubscribe = subscribeToStats(updateStats);
     return () => {
-      unsubscribe()
-    }
-  }, [updateStats])
+      unsubscribe();
+    };
+  }, [updateStats]);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -340,10 +408,8 @@ export default function Overview() {
       <div className="p-4 text-red-600 dark:text-red-400">
         {error}
       </div>
-    )
+    );
   }
-  console.log("FertilityStatus Data:", FertilityStatus);
-
 
   return (
     <>
@@ -389,7 +455,7 @@ export default function Overview() {
                 ? stallStats.filter((stall) => stall.parent === selectedBarn)
                 : []
             }
-            barns={barnStats.map((barn) => ({ title: barn.title }))} // Convert barnStats to the required format
+            barns={barnStats.map((barn) => ({ title: barn.title }))}
             selectedBarn={selectedBarn}
             onBarnSelect={(barn) => setSelectedBarn(barn)}
           />
@@ -438,19 +504,35 @@ export default function Overview() {
           />
         </div>
         <dl className="mt-10 grid grid-cols-1 gap-14 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-          {categories
-            .filter((category) => selectedCategories.includes(category.title))
-            .map((category, fake) => (
-              <ChartCard
-                key={category.title}
-                title={category.title}
-                type={category.type}
-                selectedDates={selectedDates}
-                selectedPeriod={selectedPeriod}
-              />
-            ))}
+          <ChartCard
+            title="Total Pigs"
+            type="unit"
+            selectedDates={selectedDates}
+            selectedPeriod={selectedPeriod}
+            data={chartData}
+            categories={["totalPigs"]}
+            colors={["blue"]}
+          />
+          <ChartCard
+            title="Heat Status"
+            type="unit"
+            selectedDates={selectedDates}
+            selectedPeriod={selectedPeriod}
+            data={heatChartData}
+            categories={["open", "bred", "pregnant", "farrowing", "weaning"]}
+            colors={["red", "orange", "yellow", "green", "blue"]}
+          />
+          <ChartCard
+            title="Fertility Status"
+            type="unit"
+            selectedDates={selectedDates}
+            selectedPeriod={selectedPeriod}
+            data={fertilityChartData}
+            categories={["inHeat", "preHeat", "readyToBreed"]}
+            colors={["purple", "pink", "teal"]}
+          />
         </dl>
       </section>
     </>
-  )
+  );
 }
