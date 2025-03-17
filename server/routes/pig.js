@@ -4,6 +4,8 @@ const router = express.Router()
 const Pig = require('../models/Pig')
 const BCSData = require('../models/BCSData')
 const PostureData = require('../models/PostureData')
+const PigFertility = require('../models/PigFertility');
+const PigHeatStatus = require('../models/PigHeatStatus');
 
 // Get all pigs
 router.get('/', async (req, res) => {
@@ -186,6 +188,132 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to update pig' })
   }
 })
+
+
+// Get time-series data for pig metrics, including fertility and heat status
+router.get('/analytics/time-series', async (req, res) => {
+  try {
+    const { period = 'daily' } = req.query; // Default to daily data
+
+    // Define the date range for the time series
+    const endDate = new Date();
+    const startDate = new Date();
+    if (period === 'daily') {
+      startDate.setDate(endDate.getDate() - 30); // Last 30 days
+    } else if (period === 'weekly') {
+      startDate.setDate(endDate.getDate() - 90); // Last 12 weeks
+    } else if (period === 'monthly') {
+      startDate.setMonth(endDate.getMonth() - 12); // Last 12 months
+    }
+
+    // Fetch fertility and heat status data within the date range
+    const fertilityData = await PigFertility.aggregate([
+      {
+        $match: {
+          timestamp: { $gte: startDate, $lte: endDate },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+          inHeat: { $sum: { $cond: [{ $eq: ['$status', 'in heat'] }, 1, 0] } },
+          preHeat: { $sum: { $cond: [{ $eq: ['$status', 'Pre-Heat'] }, 1, 0] } },
+          open: { $sum: { $cond: [{ $eq: ['$status', 'Open'] }, 1, 0] } },
+          readyToBreed: { $sum: { $cond: [{ $eq: ['$status', 'ready to breed'] }, 1, 0] } },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const heatStatusData = await PigHeatStatus.aggregate([
+      {
+        $match: {
+          timestamp: { $gte: startDate, $lte: endDate },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$timestamp' } },
+          open: { $sum: { $cond: [{ $eq: ['$status', 'open'] }, 1, 0] } },
+          bred: { $sum: { $cond: [{ $eq: ['$status', 'bred'] }, 1, 0] } },
+          pregnant: { $sum: { $cond: [{ $eq: ['$status', 'pregnant'] }, 1, 0] } },
+          farrowing: { $sum: { $cond: [{ $eq: ['$status', 'farrowing'] }, 1, 0] } },
+          weaning: { $sum: { $cond: [{ $eq: ['$status', 'weaning'] }, 1, 0] } },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Initialize the time-series data structure
+    const timeSeriesData = {};
+
+    // Iterate through each day/week/month and calculate metrics
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      const dateKey = currentDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+
+      // Find fertility and heat status data for the current date
+      const fertilityOnDate = fertilityData.find((entry) => entry._id === dateKey) || {
+        inHeat: 0,
+        preHeat: 0,
+        open: 0,
+        readyToBreed: 0,
+      };
+
+      const heatStatusOnDate = heatStatusData.find((entry) => entry._id === dateKey) || {
+        open: 0,
+        bred: 0,
+        pregnant: 0,
+        farrowing: 0,
+        weaning: 0,
+      };
+
+      // Calculate total pigs (assuming total pigs is the sum of all fertility statuses)
+      const totalPigs =
+        fertilityOnDate.inHeat +
+        fertilityOnDate.preHeat +
+        fertilityOnDate.open +
+        fertilityOnDate.readyToBreed;
+
+      // Add to time-series data
+      timeSeriesData[dateKey] = {
+        totalPigs,
+        totalPigsInHeat: fertilityOnDate.inHeat,
+        totalPigsReadyToBreed: fertilityOnDate.readyToBreed,
+        fertilityStatus: {
+          inHeat: fertilityOnDate.inHeat,
+          preHeat: fertilityOnDate.preHeat,
+          open: fertilityOnDate.open,
+          readyToBreed: fertilityOnDate.readyToBreed,
+        },
+        heatStatus: {
+          open: heatStatusOnDate.open,
+          bred: heatStatusOnDate.bred,
+          pregnant: heatStatusOnDate.pregnant,
+          farrowing: heatStatusOnDate.farrowing,
+          weaning: heatStatusOnDate.weaning,
+        },
+      };
+
+      // Move to the next day/week/month
+      if (period === 'daily') {
+        currentDate.setDate(currentDate.getDate() + 1);
+      } else if (period === 'weekly') {
+        currentDate.setDate(currentDate.getDate() + 7);
+      } else if (period === 'monthly') {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+      }
+    }
+
+    res.json(timeSeriesData);
+  } catch (error) {
+    console.error('Error fetching time-series data:', error);
+    res.status(500).json({ error: 'Failed to fetch time-series data' });
+  }
+});
+
+
+
 router.delete('/', async (req, res) => {
   try {
     const { pigIds } = req.body;
