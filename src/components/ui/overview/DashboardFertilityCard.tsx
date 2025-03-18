@@ -3,7 +3,6 @@ import { cx } from "@/lib/utils";
 import { Badge } from "@/components/Badge";
 
 import { Card } from "@/components/Card";
-import { DonutChart } from "@/components/DonutChart";
 import { ProgressCircle } from "@/components/ProgressCircle_S";
 
 export type KpiEntry = {
@@ -78,8 +77,16 @@ export default function FertilityProgressCard({
           <Badge variant="neutral">{change}</Badge>
         </div>
 
-        <div className="flex justify-center items-center my-6">
-          <ProgressCircle value={data[0].percentage} radius={80} strokeWidth={7}> 
+        <dd className="mt-2 flex items-baseline gap-2">
+            <span className="text-xl text-gray-900 dark:text-gray-50">
+              {value}
+            </span>
+            <span className="text-sm text-gray-500">{valueDescription}</span>
+          </dd>
+
+
+        <div className="flex justify-center items-center my-6 gap-4">
+          <ProgressCircle value={data[0].percentage} radius={80} strokeWidth={7}>
             <ProgressCircle value={data[1].percentage} radius={70} strokeWidth={7}>
               <ProgressCircle
                 value={data[2].percentage}
@@ -104,18 +111,12 @@ export default function FertilityProgressCard({
                 </ProgressCircle>
               </ProgressCircle>
             </ProgressCircle>
-          </ProgressCircle> 
-        </div>
+          </ProgressCircle>
 
 
-        <dd className="mt-2 flex items-baseline gap-2">
-          <span className="text-xl text-gray-900 dark:text-gray-50">
-            {value}
-          </span>
-          <span className="text-sm text-gray-500">{valueDescription}</span>
-        </dd>
 
-        {/* <li key={item.title} className="flex items-center gap-2 text-xs">
+
+          {/* <li key={item.title} className="flex items-center gap-2 text-xs">
                         <span
                           className={cx(item.color, "size-2.5 rounded-sm")}
                           aria-hidden="true"
@@ -127,33 +128,35 @@ export default function FertilityProgressCard({
                           ({item.value} / {item.percentage}%)
                         </span>
                       </li> */}
-        <div className="mt-2 flex items-center gap-0.5">
-          {data.map((item, idx) => (
-            <div
-              key={item.title}
-              className={cx(bgColors[idx % colors.length], `h-1.5 rounded-full`)}
-              style={{ width: `${item.percentage}%` }}
-            />
-          ))}
-        </div>
-
-        {/* List of Pig Fertility Stats */}
-        <ul role="list" className="mt-4 space-y-5">
-          {data.map((item, idx) => (
-            <li key={item.title} className="flex items-center gap-2 text-xs">
-              <span
-                className={cx(bgColors[idx % colors.length], "size-2.5 rounded-sm")}
-                aria-hidden="true"
+          <div className="mt-2 flex items-center gap-0.5">
+            {data.map((item, idx) => (
+              <div
+                key={item.title}
+                className={cx(bgColors[idx % colors.length], `h-1.5 rounded-full`)}
+                style={{ width: `${item.percentage}%` }}
               />
-              <span className="text-gray-900 dark:text-gray-50">
-                {item.title}
-              </span>
-              <span className="text-gray-600 dark:text-gray-400">
-                ({item.current} / {item.allowed})
-              </span>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </div>
+
+          {/* List of Pig Fertility Stats */}
+          <ul role="list" className="mt-4 space-y-5">
+            {data.map((item, idx) => (
+              <li key={item.title} className="flex items-center gap-2 text-xs">
+                <span
+                  className={cx(bgColors[idx % colors.length], "size-2.5 rounded-sm")}
+                  aria-hidden="true"
+                />
+                <span className="text-gray-900 dark:text-gray-50">
+                  {item.title}
+                </span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  ({item.current} / {item.allowed})
+                </span>
+              </li>
+            ))}
+          </ul>
+
+        </div>
 
         {/* Footer */}
         <div className="px-4 pb-4">
