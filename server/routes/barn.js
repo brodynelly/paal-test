@@ -5,7 +5,17 @@ const Barn = require('../models/Barn')
 const Stall = require('../models/Stall')
 const Device = require('../models/Device')
 const Pig = require('../models/Pig') // if pigs are associated or relevant at barn level
+const rateLimit = require('express-rate-limit')
 
+
+// Set up rate limiter: maximum of 100 requests per 15 minutes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+})
+
+// Apply rate limiter to all requests
+router.use(limiter)
 
 // GET all barns
 router.get('/', async (req, res) => {
