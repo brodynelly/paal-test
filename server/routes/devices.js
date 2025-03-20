@@ -241,10 +241,17 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const deviceId = parseInt(req.params.id)
+    
+    // Validate req.body values
+    const { deviceName, deviceType, status } = req.body;
+    if (typeof deviceName !== 'string' || typeof deviceType !== 'string' || typeof status !== 'string') {
+      return res.status(400).json({ error: 'Invalid input data' });
+    }
+    
     const updates = {
-      deviceName: req.body.deviceName,
-      deviceType: req.body.deviceType,
-      status: req.body.status,
+      deviceName,
+      deviceType,
+      status,
       lastUpdate: new Date()
     }
     
