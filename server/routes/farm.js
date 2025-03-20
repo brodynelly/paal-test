@@ -6,9 +6,16 @@ const Barn = require('../models/Barn')
 const Stall = require('../models/Stall')
 const Device = require('../models/Device')
 const Pig = require('../models/Pig') // if pigs are associated at the farm level or indirectly through barns/stalls
+const rateLimit = require('express-rate-limit')
+
+// Rate limiter middleware
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+})
 
 // GET all farms
-router.get('/', async (req, res) => {
+router.get('/', limiter, async (req, res) => {
   try {
     const farms = await Farm.find({})
       .populate('barns') // if you want to see associated barn data
@@ -21,7 +28,7 @@ router.get('/', async (req, res) => {
 })
 
 // GET single farm
-router.get('/:id', async (req, res) => {
+router.get('/:id', limiter, async (req, res) => {
   try {
     const farm = await Farm.findById(req.params.id)
       .populate('barns')
@@ -36,7 +43,7 @@ router.get('/:id', async (req, res) => {
 })
 
 // CREATE new farm
-router.post('/', async (req, res) => {
+router.post('/', limiter, async (req, res) => {
   try {
     const newFarm = await Farm.create({
       name: req.body.name,
@@ -51,7 +58,7 @@ router.post('/', async (req, res) => {
 })
 
 // UPDATE farm
-router.put('/:id', async (req, res) => {
+router.put('/:id', limiter, async (req, res) => {
   try {
     // Validate input
     const { name, location } = req.body;
@@ -75,7 +82,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // DELETE farm
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', limiter, async (req, res) => {
   try {
     const result = await Farm.findByIdAndDelete(req.params.id)
     if (!result) {
