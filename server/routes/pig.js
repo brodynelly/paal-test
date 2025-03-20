@@ -6,6 +6,16 @@ const BCSData = require('../models/BCSData')
 const PostureData = require('../models/PostureData')
 const PigFertility = require('../models/PigFertility');
 const PigHeatStatus = require('../models/PigHeatStatus');
+const rateLimit = require('express-rate-limit');
+
+// Define rate limiter: maximum of 100 requests per 15 minutes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+
+// Apply rate limiter to all requests
+router.use(limiter);
 
 // Get all pigs
 router.get('/', async (req, res) => {
