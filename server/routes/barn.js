@@ -6,6 +6,7 @@ const Stall = require('../models/Stall')
 const Device = require('../models/Device')
 const Pig = require('../models/Pig') // if pigs are associated or relevant at barn level
 
+
 // GET all barns
 router.get('/', async (req, res) => {
   try {
