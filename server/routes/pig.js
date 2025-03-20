@@ -165,16 +165,23 @@ router.get('/:id/posture', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const pigId = parseInt(req.params.id)
-    const updates = {
-      breed: req.body.breed,
-      age: parseInt(req.body.age),
-      groupId: parseInt(req.body.group),
-      lastUpdate: new Date()
+    
+    // Validate and sanitize req.body fields
+    const updates = {}
+    if (typeof req.body.breed === 'string') {
+      updates.breed = req.body.breed
     }
+    if (!isNaN(parseInt(req.body.age))) {
+      updates.age = parseInt(req.body.age)
+    }
+    if (!isNaN(parseInt(req.body.group))) {
+      updates.groupId = parseInt(req.body.group)
+    }
+    updates.lastUpdate = new Date()
     
     const updatedPig = await Pig.findOneAndUpdate(
       { pigId },
-      updates,
+      { $set: updates },
       { new: true }
     )
 
