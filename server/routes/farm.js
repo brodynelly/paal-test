@@ -53,13 +53,15 @@ router.post('/', async (req, res) => {
 // UPDATE farm
 router.put('/:id', async (req, res) => {
   try {
+    // Validate input
+    const { name, location } = req.body;
+    if (typeof name !== 'string' || typeof location !== 'string') {
+      return res.status(400).json({ error: 'Invalid input' });
+    }
+
     const updatedFarm = await Farm.findByIdAndUpdate(
       req.params.id,
-      {
-        name: req.body.name,
-        location: req.body.location
-        // If you need to add or remove barns, do so carefully here
-      },
+      { $set: { name, location } },
       { new: true }
     )
     if (!updatedFarm) {
