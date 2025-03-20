@@ -35,6 +35,10 @@ router.get('/:id', async (req, res) => {
 // CREATE barn
 router.post('/', async (req, res) => {
   try {
+    // Validate input
+    if (typeof req.body.name !== 'string' || typeof req.body.description !== 'string' || typeof req.body.farmId !== 'string') {
+      return res.status(400).json({ error: 'Invalid input' });
+    }
     const newBarn = await Barn.create({
       name: req.body.name,
       description: req.body.description,
@@ -50,13 +54,17 @@ router.post('/', async (req, res) => {
 // UPDATE barn
 router.put('/:id', async (req, res) => {
   try {
+    // Validate input
+    if (typeof req.body.name !== 'string' || typeof req.body.description !== 'string' || typeof req.body.farmId !== 'string') {
+      return res.status(400).json({ error: 'Invalid input' });
+    }
     const updatedBarn = await Barn.findByIdAndUpdate(
       req.params.id,
-      {
+      { $set: {
         name: req.body.name,
         description: req.body.description,
         farmId: req.body.farmId
-      },
+      }},
       { new: true }
     )
     if (!updatedBarn) {
