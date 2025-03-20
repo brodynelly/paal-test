@@ -86,20 +86,20 @@ router.put('/:id', async (req, res) => {
   try {
     const pigId = parseInt(req.params.id)
     const updates = {}
-    if (req.body.breed && validator.isAlpha(req.body.breed)) {
-      updates.breed = req.body.breed
+    if (req.body.breed && validator.isAlpha(req.body.breed, 'en-US', { ignore: ' ' })) {
+      updates.breed = req.body.breed.trim()
     }
-    if (req.body.age && validator.isInt(req.body.age)) {
-      updates.age = parseInt(req.body.age)
+    if (req.body.age && validator.isInt(req.body.age, { min: 0 })) {
+      updates.age = parseInt(req.body.age, 10)
     }
-    if (req.body.group && validator.isInt(req.body.group)) {
-      updates.groupId = parseInt(req.body.group)
+    if (req.body.group && validator.isInt(req.body.group, { min: 0 })) {
+      updates.groupId = parseInt(req.body.group, 10)
     }
     updates.lastUpdate = new Date()
     
     const updatedPig = await Pig.findOneAndUpdate(
       { pigId },
-      updates,
+      { $set: updates },
       { new: true }
     )
 
