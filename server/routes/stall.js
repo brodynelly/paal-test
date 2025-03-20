@@ -4,9 +4,16 @@ const router = express.Router()
 const Stall = require('../models/Stall')
 const Device = require('../models/Device')
 const Pig = require('../models/Pig') // If pigs reference a stall, or if you want to track it
+const rateLimit = require('express-rate-limit')
+
+// Configure rate limiter: maximum of 100 requests per 15 minutes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+})
 
 // GET all stalls
-router.get('/', async (req, res) => {
+router.get('/', limiter, async (req, res) => {
   try {
     const stalls = await Stall.find({}).sort({ name: 1 })
     res.json(stalls)
@@ -17,7 +24,7 @@ router.get('/', async (req, res) => {
 })
 
 // GET single stall
-router.get('/:id', async (req, res) => {
+router.get('/:id', limiter, async (req, res) => {
   try {
     const stall = await Stall.findById(req.params.id)
     if (!stall) {
@@ -31,7 +38,7 @@ router.get('/:id', async (req, res) => {
 })
 
 // CREATE stall
-router.post('/', async (req, res) => {
+router.post('/', limiter, async (req, res) => {
   try {
     const newStall = await Stall.create({
       name: req.body.name,
@@ -46,7 +53,7 @@ router.post('/', async (req, res) => {
 })
 
 // UPDATE stall
-router.put('/:id', async (req, res) => {
+router.put('/:id', limiter, async (req, res) => {
   try {
     const updatedStall = await Stall.findByIdAndUpdate(
       req.params.id,
@@ -68,7 +75,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // DELETE stall
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', limiter, async (req, res) => {
   try {
     const stall = await Stall.findByIdAndDelete(req.params.id)
     if (!stall) {
@@ -83,7 +90,7 @@ router.delete('/:id', async (req, res) => {
 })
 
 // GET stall analytics
-router.get('/:id/analytics', async (req, res) => {
+router.get('/:id/analytics', limiter, async (req, res) => {
   try {
     const stall = await Stall.findById(req.params.id)
     if (!stall) {
