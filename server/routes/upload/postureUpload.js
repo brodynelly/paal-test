@@ -3,21 +3,46 @@ const router = express.Router();
 const multer = require('multer');
 const csv = require('csv-parser');
 const fs = require('fs');
+const path = require('path');
+const RateLimit = require('express-rate-limit');  // Import the rate limit package
 const Pig = require('../../models/Pig');
 const PigPosture = require('../../models/PostureData');
 
-const upload = multer({ dest: 'uploads/' });
+// Define a safe root directory for file uploads
+const ROOT_UPLOAD_PATH = path.resolve('uploads/');
 
-router.post('/:pig_id', upload.single('file'), async (req, res) => {
+// Initialize multer to save files to the 'uploads/' directory
+const upload = multer({ dest: ROOT_UPLOAD_PATH });
+
+// Rate-limiting configuration
+const limiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again after 15 minutes',
+});
+
+// Apply the rate limiter to the specific route
+router.post('/:pig_id', limiter, upload.single('file'), async (req, res) => {
   const { pig_id } = req.params;
 
+  // Validate the pig_id
   if (!pig_id || isNaN(pig_id)) {
     return res.status(400).json({ error: 'Invalid pig_id. Must be a number.' });
   }
 
+  // Get the uploaded file path
   const filePath = req.file.path;
 
+  // Sanitize and validate the file path to ensure it's within the safe upload folder
+  const normalizedFilePath = path.resolve(filePath);
+  
+  // Ensure the file path is inside the ROOT_UPLOAD_PATH
+  if (!normalizedFilePath.startsWith(ROOT_UPLOAD_PATH)) {
+    return res.status(400).json({ error: 'Invalid file path. Potential path traversal attempt detected.' });
+  }
+
   try {
+    // Find the pig based on pig_id
     const pig = await Pig.findOne({ pigId: Number(pig_id) });
     if (!pig) {
       return res.status(404).json({ error: 'Pig not found' });
@@ -46,15 +71,6 @@ router.post('/:pig_id', upload.single('file'), async (req, res) => {
 
             // Convert the Date object to an ISO string for MongoDB
             const isoTimestamp = timestamp.toISOString();
-
-            // // Parse the Posture score
-            // const postureScore = parseInt(Posture, 10);
-
-            // // Validate the Posture score (must be between 0 and 5)
-            // if (isNaN(postureScore) || postureScore < 0 || postureScore > 5) {
-            //   console.error('Invalid Posture Score:', Posture);
-            //   continue; // Skip this row
-            // }
 
             // Save the posture data
             const postureData = new PigPosture({

@@ -16,10 +16,17 @@ const io = new Server(httpServer, {
 
 const port = 5005
 
+var RateLimit = require('express-rate-limit');
+var limiter = RateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // max 100 requests per windowMs
+});
+
 // ──────────────────────────────────────────────────────────────────────────────
 // Middleware
 // ──────────────────────────────────────────────────────────────────────────────
 app.use(cors())
+app.use(Limiter); 
 app.use(express.json())
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -37,6 +44,10 @@ app.use('/api/pigs', require('./routes/pig'))            // updated to match you
 app.use('/api/temperature', require('./routes/temperatureData'))
 app.use('/api/stats', require('./routes/stats'))
 app.use('/api/upload/postureupload', require('./routes/upload/postureUpload')) // llisten for uploaded csvs 
+var RateLimit = require('express-rate-limit');
+
+
+
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Database Connection
@@ -157,7 +168,7 @@ const emitUpdatedStats = async () => {
     }, {});
 
     // Pig Fertility aggregation
-    const pigFertilityAggregated = await PigFertilityStatus.aggregate([
+    const pigFertilityAggregated = await PigFertility.aggregate([
       { $sort: { timestamp: -1 } }, // Step 1: Sort by latest timestamp
       { $group: { _id: "$pigId", status: { $first: "$status" } } }, // Step 2: Get latest status per pig
       { $group: { _id: "$status", count: { $sum: 1 } } } // Step 3: Count total per fertility status
@@ -208,7 +219,7 @@ const emitUpdatedStats = async () => {
           }),
       breed: pig.breed,
       healthStatus: pigHealthStatuses.find(status => status.pigId.toString() === pig._id.toString())?.status,
-      fertilityStatus: pigFertilityStatuses.find(status => status.pigId.toString() === pig._id.toString())?.status,
+      /* fertilityStatus: pigFertilityStatuses.find(status => status.pigId.toString() === pig._id.toString())?.status, */
       heatStatus: pigHeatStatuses.find(status => status.pigId.toString() === pig._id.toString())?.status
     }))
 
