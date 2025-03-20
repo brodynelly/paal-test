@@ -142,6 +142,16 @@
 const express = require('express')
 const router = express.Router()
 const Device = require('../models/Device')
+const rateLimit = require('express-rate-limit')
+
+// Set up rate limiter: maximum of 100 requests per 15 minutes
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+})
+
+// Apply rate limiter to all requests
+router.use(limiter)
 const TemperatureData = require('../models/TemperatureData')
 const Pig = require('../models/Pig')
 
