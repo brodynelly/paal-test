@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/Select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/Tabs";
-import axios from "axios";
+import api from "@/lib/axios";
 import React, { useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { PigIdInput } from "./CheckPig";
@@ -265,8 +265,8 @@ const FeedForm = ({ pigId }: FeedFormProps) => {
     formData.append("file", files[0]); // Append the first file
 
     try {
-      const response = await axios.post(
-        `http://localhost:5005/api/upload/postureUpload/${pigId}`, // Use the pigId prop
+      const response = await api.post(
+        `/upload/postureUpload/${pigId}`, // Use the pigId prop
         formData,
         {
           headers: {
@@ -454,8 +454,8 @@ export function PigEditDrawer({
 
   // 4) On mount, fetch master farm list
   useEffect(() => {
-    axios
-      .get("http://localhost:5005/api/farms")
+    api
+      .get("farms")
       .then((res) => setFarms(res.data))
       .catch((err) => console.error("Error fetching farms:", err));
   }, []);
@@ -463,8 +463,8 @@ export function PigEditDrawer({
   // 5) On mount or whenever we get farm, fetch relevant barns
   useEffect(() => {
     if (formData.farm) {
-      axios
-        .get(`http://localhost:5005/api/barns?farmId=${formData.farm}`)
+      api
+        .get(`/barns?farmId=${formData.farm}`)
         .then((res) => setBarns(res.data))
         .catch((err) => console.error("Error fetching barns for farm:", err));
     } else {
@@ -474,8 +474,8 @@ export function PigEditDrawer({
 
   // 6) On mount, fetch master stalls
   useEffect(() => {
-    axios
-      .get("http://localhost:5005/api/stalls")
+    api
+      .get("/stalls")
       .then((res) => setStalls(res.data))
       .catch((err) => console.error("Error fetching stalls:", err));
   }, []);
@@ -484,8 +484,8 @@ export function PigEditDrawer({
   // and then set the farm, barn, stall IDs accordingly.
   useEffect(() => {
     if (!formData.pigId) return;
-    axios
-      .get(`http://localhost:5005/api/pigs/${formData.pigId}`)
+    api
+      .get(`/pigs/${formData.pigId}`)
       .then((res) => {
         // Suppose `res.data` = { farmId: "...", barnId: "...", stallId: "..." }
         setFormData((prev) => ({
@@ -518,8 +518,8 @@ export function PigEditDrawer({
         },
       };
       // Example: PUT /api/pigs/85 with data
-      await axios.put(
-        `http://localhost:5005/api/pigs/${formData.pigId}`,
+      await api.put(
+        `/pigs/${formData.pigId}`,
         preparedData
       );
       console.log("Pig data updated:", preparedData);

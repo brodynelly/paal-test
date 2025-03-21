@@ -68,10 +68,10 @@ function DataTableBulkEditor<TData>({
   const handleDelete = async () => {
     setIsLoading(true)
     try {
-      const selectedPigs = table.getSelectedRowModel().rows.map(row => 
+      const selectedPigs = table.getSelectedRowModel().rows.map(row =>
         (row.original as any).owner.replace('PIG-', '')
       )
-      await api.delete(`http://localhost:5005/api/pigs`, {
+      await api.delete(`/pigs`, {
         data: { pigIds: selectedPigs }
       })
     } catch (error) {
@@ -123,7 +123,7 @@ function DataTableBulkEditor<TData>({
           />
         </CommandBarBar>
       </CommandBar>
-{/*  
+      {/*  
        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <DialogHeader>

@@ -1,6 +1,6 @@
 import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
-import axios from "axios"
+import api from "@/lib/axios"
 import { useState } from "react"
 
 type PigFormData = {
@@ -26,7 +26,7 @@ export function PigIdInput({ value, onChange, onError }: PigIdInputProps) {
     setIsChecking(true);
     try {
       // GET endpoint: Assumes your GET route is /api/pigs/:id and returns 404 if not found.
-      await axios.get(`http://localhost:5005/api/pigs/${id}`);
+      await api.get(`/pigs/${id}`);
       // If we get here, the pig exists
       setHasError(true);
       onError("This Pig ID already exists.");

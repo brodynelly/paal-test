@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/Select"
+import api from "@/lib/axios"
 import axios from "axios"
 import React, { useEffect, useState } from "react"
 import { PigIdInput } from "./CheckPig"; // Assume this handles checking for duplicate Pig IDs
@@ -197,7 +198,7 @@ const SecondPage = ({ formData, onUpdateForm }: SecondPageProps) => {
   const handlePigIdChange = (value: string) => {
     // Update both pigId and tag in the form state.
     onUpdateForm({ pigId: value });
-    onUpdateForm({ tag: value ? `PIG-${value}` : "" }); 
+    onUpdateForm({ tag: value ? `PIG-${value}` : "" });
   };
 
   return (
@@ -344,8 +345,8 @@ export function PigDrawer({ open, onOpenChange }: PigDrawerProps) {
 
   // Fetch farms on mount
   useEffect(() => {
-    axios
-      .get("http://localhost:5005/api/farms")
+    api
+      .get("/farms")
       .then((res) => {
         setFarms(res.data)
       })
@@ -355,8 +356,8 @@ export function PigDrawer({ open, onOpenChange }: PigDrawerProps) {
   // Whenever a farm is selected, fetch barns for that farm.
   useEffect(() => {
     if (formData.farm) {
-      axios
-        .get(`http://localhost:5005/api/barns?farmId=${formData.farm}`)
+      api
+        .get(`/barns?farmId=${formData.farm}`)
         .then((res) => {
           setBarns(res.data)
         })
@@ -368,8 +369,8 @@ export function PigDrawer({ open, onOpenChange }: PigDrawerProps) {
 
   // Fetch stalls on mount
   useEffect(() => {
-    axios
-      .get("http://localhost:5005/api/stalls")
+    api
+      .get("/stalls")
       .then((res) => {
         setStalls(res.data)
       })
@@ -395,7 +396,7 @@ export function PigDrawer({ open, onOpenChange }: PigDrawerProps) {
           stallId: formData.stall,
         },
       }
-      await axios.post("http://localhost:5005/api/pigs", preparedData)
+      await axios.post("/api/pigs", preparedData)
       console.log("Pig data submitted:", preparedData)
       onOpenChange(false)
     } catch (error) {
