@@ -39,8 +39,8 @@ Getting Started
 
 ### 1\. Clone the Repository
 
-    git clone https://github.com/brodynelly/paal-test.git
-    cd paal-test
+    git clone https://github.com/brodynelly/paal.git
+    cd paal
 
 ### 2\. Create and Switch to Your Specified `localDev` Branch
 
