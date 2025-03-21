@@ -257,7 +257,7 @@ export default function Overview() {
     setHeatStats([
       {
         title: "Open",
-        percentage: ((data.pigHeatStats.totalOpen ?? 0) / (data.pigStats.totalPigs ?? 1)) * 100,
+        percentage: ((data.pigHeatStats["totalOpen"] ?? 0) / (data.pigStats.totalPigs ?? 1)) * 100,
         current: data.pigHeatStats.totalOpen ?? 0,
         allowed: data.pigStats.totalPigs ?? 100,
       },
@@ -286,6 +286,8 @@ export default function Overview() {
         allowed: data.pigStats.totalPigs ?? 100,
       },
     ]);
+
+
 
     // Update barn stats
     const barnStatsData = Object.entries(data.barnStats).map(([barnName, totalPigs]) => ({
@@ -455,7 +457,7 @@ export default function Overview() {
                 ? stallStats.filter((stall) => stall.parent === selectedBarn)
                 : []
             }
-            barns={barnStats.map((barn) => ({ title: barn.title }))}
+            barns={barnStats.map((barn) => ({ title: barn.title, href: "#" }))}
             selectedBarn={selectedBarn}
             onBarnSelect={(barn) => setSelectedBarn(barn)}
           />

@@ -22,11 +22,13 @@ var limiter = RateLimit({
   max: 100, // max 100 requests per windowMs
 });
 
+app.set('trust proxy', true); 
+
 // ──────────────────────────────────────────────────────────────────────────────
 // Middleware
 // ──────────────────────────────────────────────────────────────────────────────
 app.use(cors())
-app.use(Limiter); 
+app.use(limiter); 
 app.use(express.json())
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -106,6 +108,9 @@ const emitUpdatedStats = async () => {
     const PigHealthStatus = require('./models/PigHealthStatus')
     const PigFertility = require('./models/PigFertility')
     const PigHeatStatus = require('./models/PigHeatStatus')
+    const Barn = require('./models/Barn')
+    const Stall = require('./models/Stall')
+
     // If you also want Farm, Barn, Stall stats in real time:
     // const Farm = require('./models/Farm')
     // const Barn = require('./models/Barn')
@@ -197,7 +202,49 @@ const emitUpdatedStats = async () => {
         : new Date().toISOString()
     }))
 
-    // Transform pigs for UI
+        const pigHeatStatusData = await PigHeatStatus.aggregate([
+          { $sort: { timestamp: -1 } },
+          { $group: { _id: "$pigId", status: { $first: "$status" } } },
+          { $group: { _id: "$status", count: { $sum: 1 } } }
+        ]);
+    
+        // Calculate totals for each heat status
+        const pigHeatStats = {
+          totalOpen: pigHeatStatusData.find(h => h._id === 'open')?.count || 0,
+          totalBred: pigHeatStatusData.find(h => h._id === 'bred')?.count || 0,
+          totalPregnant: pigHeatStatusData.find(h => h._id === 'pregnant')?.count || 0,
+          totalFarrowing: pigHeatStatusData.find(h => h._id === 'farrowing')?.count || 0,
+          totalWeaning: pigHeatStatusData.find(h => h._id === 'weaning')?.count || 0,
+        };
+
+
+    const barns = await Barn.find({})
+    const stalls = await Stall.find({})
+        
+
+    // Barn Stats = total pigs per barn
+    const barnStats = barns.reduce((acc, barn) => {
+      const pigsInBarn = pigs.filter(p => p.currentLocation?.barnId?.toString() === barn._id.toString()).length
+      acc[barn.name] = pigsInBarn
+      return acc
+    }, {})
+
+    // Stall Stats = nested: { barnName: { stallName: count } }
+    const stallStats = barns.reduce((barnAcc, barn) => {
+      const stallsInBarn = stalls.filter(stall => stall.barnId?.toString() === barn._id.toString())
+
+      const stallSummary = stallsInBarn.reduce((stallAcc, stall) => {
+        const pigsInStall = pigs.filter(p => p.currentLocation?.stallId?.toString() === stall._id.toString()).length
+        stallAcc[stall.name] = pigsInStall
+        return stallAcc
+      }, {})
+
+      barnAcc[barn.name] = stallSummary
+      return barnAcc
+    }, {})
+
+    // Transform pigs for UI    
+    
 
 
     
@@ -239,6 +286,9 @@ const emitUpdatedStats = async () => {
       pigStats: {
         totalPigs: pigs.length,
       },
+      pigHeatStats, 
+      barnStats,      // Now included
+      stallStats,      // Now included
       pigHealthStats: {
         totalAtRisk: pigHealthAggregated.filter(h => h._id === 'at risk')[0]?.count || 0,
         totalHealthy: pigHealthAggregated.filter(h => h._id === 'healthy')[0]?.count || 0,
