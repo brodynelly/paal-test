@@ -1,5 +1,5 @@
 "use client"
-import { BarChartVariant } from "@/components/BarChartVariant"
+import { BarChartVariant } from "@/components/BarChartVariantFull"
 import { Tooltip } from "@/components/Tooltip"
 import { Transaction } from "@/data/schema"
 import { transactions } from "@/data/transactions"
@@ -11,8 +11,10 @@ import { useMemo } from "react"
 import { DEFAULT_RANGE, RANGE_DAYS, RangeKey } from "./dateRanges"
 
 interface ChartDataItem {
-  key: string
-  value: number
+  key?: string
+  value?: number
+  date?: string
+  [key: string]: number | string | undefined
 }
 
 type ChartType = "amount" | "count" | "category" | "merchant"
@@ -42,17 +44,17 @@ interface Filters {
 const generateDailyIntegerData = (days: number) => {
   const data = []
   const now = new Date()
-  
+
   for (let i = days; i >= 0; i--) {
     const date = new Date(now)
     date.setDate(date.getDate() - i)
-    
+
     // Generate random counts for each value (1-5)
     const total = 100 // Total observations per day
     const values = [1, 2, 3, 4, 5]
     let remaining = total
     const counts: { [key: number]: number } = {}
-    
+
     values.forEach((value, index) => {
       if (index === values.length - 1) {
         counts[value] = remaining
@@ -62,13 +64,13 @@ const generateDailyIntegerData = (days: number) => {
         remaining -= count
       }
     })
-    
+
     data.push({
       date: date.toISOString().split('T')[0],
       ...counts
     })
   }
-  
+
   return data
 }
 
@@ -243,14 +245,14 @@ export function TransactionChart({
         const total = Object.entries(day)
           .filter(([key]) => !isNaN(Number(key)))
           .reduce((sum, [, count]) => sum + (count as number), 0)
-        
+
         const percentages: any = { date: day.date }
         Object.entries(day)
           .filter(([key]) => !isNaN(Number(key)))
           .forEach(([value, count]) => {
             percentages[value] = ((count as number) / total) * 100
           })
-        
+
         return percentages
       })
     }
@@ -259,8 +261,8 @@ export function TransactionChart({
   }, [range, expenseStatus, minAmount, maxAmount, selectedCountries, config, type, showPercentage])
 
   const categories = type === "amount" ? ["1", "2", "3", "4", "5"] : ["value"]
-  const colors: AvailableChartColorsKeys[] = type === "amount" 
-    ? ["blue", "emerald", "violet", "amber", "gray"] 
+  const colors: AvailableChartColorsKeys[] = type === "amount"
+    ? ["blue", "emerald", "violet", "amber", "gray"]
     : [config.color as AvailableChartColorsKeys]
 
   return (
@@ -288,7 +290,7 @@ export function TransactionChart({
         valueFormatter={config.valueFormatter}
         xValueFormatter={config.xValueFormatter}
         showYAxis={showYAxis}
-        className="mt-6 h-48"
+        className="m-4 h-64"
         layout={config.layout}
         barCategoryGap="6%"
         aria-labelledby={`${type}-chart-title`}

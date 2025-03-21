@@ -79,7 +79,7 @@ export default function Header() {
           <AccordionContent className="p-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-end">
               <FilterDate />
-              <FilterAmount />
+              {/* <FilterAmount /> */}
               <Button
                 variant="light"
                 className="h-fit dark:border-gray-800"
@@ -93,7 +93,7 @@ export default function Header() {
       </Accordion>
       <div className="hidden items-end gap-3 md:flex md:flex-wrap">
         <FilterDate />
-        <FilterAmount />
+        {/* <FilterAmount /> */}
         <Button
           variant="light"
           className="h-fit dark:border-gray-800"

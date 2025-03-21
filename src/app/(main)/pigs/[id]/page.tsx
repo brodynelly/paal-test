@@ -8,6 +8,7 @@ import api from "@/lib/axios"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import Header from "./_components/Header"
+import Header2 from "./_components/Header2"
 import { LineChart } from "./_components/LineChart"
 import { TransactionChart } from "./_components/TransactionChart"
 
@@ -110,9 +111,11 @@ export default function PigDashboard() {
         {getBCSStatusBadge(pig.age)}
       </div>
 
-      <Header />
+      
+
       <section className="my-8">
         <div className="space-y-12">
+          <Header />
           {/* Daily Integer Value Distribution Chart */}
           <TransactionChart
             yAxisWidth={70}
@@ -142,6 +145,7 @@ export default function PigDashboard() {
           autoMinValue
         />
       </div> */}
+          <Header2 />
 
           {/* Line Charts with Tabs */}
           <div className="space-y-4">
@@ -155,14 +159,29 @@ export default function PigDashboard() {
                 <LineChart
                   yAxisWidth={70}
                   type="bcs"
-                  //className="hidden sm:block"
-                  startEndOnly={true}
-                  showYAxis={true}
-                  showLegend={false}
-                  showTooltip={true}
-                  autoMinValue
+                  className="hidden sm:block"
                 />
                 <LineChart showYAxis={false} type="bcs" className="sm:hidden" />
+                <LineChart
+                  yAxisWidth={70}
+                  type="vulva"
+                  className="hidden sm:block"
+                />
+                <LineChart
+                  showYAxis={false}
+                  type="vulva"
+                  className="sm:hidden"
+                />
+                <LineChart
+                  yAxisWidth={70}
+                  type="breathing"
+                  className="hidden sm:block"
+                />
+                <LineChart
+                  showYAxis={false}
+                  type="breathing"
+                  className="sm:hidden"
+                />
               </TabsContent>
               <TabsContent value="vulva">
                 <LineChart

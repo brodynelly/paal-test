@@ -1,7 +1,7 @@
 "use client"
-import { AreaChart } from "@/components/AreaChart"
+import { LineChart as ExternalLineChart } from "@/components/LineChart"
 import { useQueryState } from "nuqs"
-import React, { useMemo } from "react"
+import { useMemo } from "react"
 import { DEFAULT_RANGE, RANGE_DAYS, RangeKey } from "./dateRanges"
 
 interface LineChartProps {
@@ -14,11 +14,11 @@ interface LineChartProps {
 const generateDummyData = (days: number, type: "bcs" | "vulva" | "breathing") => {
   const data = []
   const now = new Date()
-  
+
   for (let i = days; i >= 0; i--) {
     const date = new Date(now)
     date.setDate(date.getDate() - i)
-    
+
     let value = 0
     switch (type) {
       case "bcs":
@@ -34,13 +34,13 @@ const generateDummyData = (days: number, type: "bcs" | "vulva" | "breathing") =>
         value = 12 + Math.random() * 8
         break
     }
-    
+
     data.push({
       date: date.toISOString().split('T')[0],
       value: Number(value.toFixed(1))
     })
   }
-  
+
   return data
 }
 
@@ -84,7 +84,7 @@ export function LineChart({
 
   return (
     <div className={className}>
-      <AreaChart
+      <ExternalLineChart
         data={data}
         index="date"
         categories={["value"]}

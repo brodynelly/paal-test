@@ -20,6 +20,10 @@ var RateLimit = require('express-rate-limit');
 var limiter = RateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // max 100 requests per windowMs
+  keyGenerator: (req) => {
+    // Use the first IP in the X-Forwarded-For header (client's real IP)
+    return req.headers["x-forwarded-for"]?.split(",")[0] || req.ip;
+  },
 });
 
 app.set('trust proxy', true); 
