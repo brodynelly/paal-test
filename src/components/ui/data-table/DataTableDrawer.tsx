@@ -74,7 +74,7 @@ export type PigFormData = {
 //   breed: "Berkshire",
 //   ...
 // }
-type ServerPigData = {
+export type ServerPigData = {
   owner: string;
   breed?: string;
   costs?: number;

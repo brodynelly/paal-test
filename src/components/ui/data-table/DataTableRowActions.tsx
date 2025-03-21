@@ -16,7 +16,7 @@ import {
 } from "@/components/Dropdown";
 
 import api from "@/lib/axios";
-import { PigEditDrawer, PigFormData } from "./DataTableDrawer";
+import { PigEditDrawer, ServerPigData } from "./DataTableDrawer";
 
 
 
@@ -25,12 +25,12 @@ interface DataTableRowActionsProps<TData> {
   row: Row<TData>
 }
 
-export function DataTableRowActions<TData extends PigFormData & { _id: string }>({ table, row }: DataTableRowActionsProps<TData>) {
+export function DataTableRowActions<TData extends ServerPigData & { _id: string }>({ table, row }: DataTableRowActionsProps<TData>) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [selectedPig, setSelectedPig] = useState<any>(null)
   const [editDrawerOpen, setEditDrawerOpen] = useState(false)
-  const [editPigData, setEditPigData] = useState<PigFormData & { _id: string } | null>(null)
+  const [editPigData, setEditPigData] = useState<ServerPigData & { _id: string } | null>(null)
 
   const handleEdit = (row: Row<TData>) => {
     setEditPigData(row.original)  // assuming row.original holds the pig data
